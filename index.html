@@ -1508,8 +1508,9 @@
         <div class="trip-manager">
           <select class="trip-select" id="trip-select" aria-label="選擇行程表"></select>
           <input class="trip-name-input" id="trip-name-input" type="text" value="北海道自駕行程表" aria-label="行程表名稱">
-          <button class="icon-btn" type="button" data-action="save-trip" title="儲存行程表" aria-label="儲存行程表">
+          <button class="command-btn secondary" type="button" data-action="save-trip" title="儲存到此裝置" aria-label="儲存到此裝置">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            本機儲存
           </button>
           <button class="icon-btn" type="button" data-action="new-trip" title="另存新行程表" aria-label="另存新行程表">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -1518,6 +1519,14 @@
             <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
+        <button class="command-btn secondary" type="button" data-action="export-backup">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          匯出備份
+        </button>
+        <button class="command-btn secondary" type="button" data-action="import-backup">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          匯入備份
+        </button>
         <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
         </button>
@@ -1554,6 +1563,7 @@
         <ul class="privacy-list">
           <li>其他人打開同一網址，只會看到公開範本和他們自己裝置內的資料。</li>
           <li>同一部手機或電腦若共用同一個瀏覽器，仍可能看到該瀏覽器保存的行程。</li>
+          <li>可用匯出備份下載到自己裝置；匯入時只選擇自己信任的備份檔。</li>
           <li>AI 生成只有在你填寫 API 端點並按下按鈕時，才會把輸入內容送到該端點。</li>
         </ul>
       </div>
@@ -1999,6 +2009,7 @@
         重置
       </button>
     </nav>
+    <input id="backup-input" type="file" accept="application/json,.json" hidden>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="lightbox" id="lightbox" aria-hidden="true">
       <button class="lightbox-close" type="button" data-action="close-image" aria-label="關閉圖片"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
@@ -2066,6 +2077,7 @@
     const memoList = document.querySelector("#memo-list");
     const attachmentGrid = document.querySelector("#attachment-grid");
     const screenshotInput = document.querySelector("#screenshot-input");
+    const backupInput = document.querySelector("#backup-input");
     const planInput = document.querySelector("#plan-input");
     const planFileInput = document.querySelector("#plan-file-input");
     const aiEndpointInput = document.querySelector("#ai-endpoint-input");
@@ -2454,6 +2466,119 @@
 
     function saveData() {
       saveCurrentTrip();
+    }
+
+    function backupFileName() {
+      const date = new Date().toISOString().slice(0, 10);
+      const rawName = tripNameInput?.value.trim() || defaultTripName();
+      const safeName = rawName.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").slice(0, 42) || "itinerary";
+      return `${safeName}-backup-${date}.json`;
+    }
+
+    function downloadTextFile(filename, text) {
+      const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function exportBackup() {
+      saveData();
+      try {
+        const payload = {
+          app: "travel-itinerary-maker",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          note: "此備份檔只供自己保存。不要公開含私人截圖、訂單或門票資料的備份檔。",
+          state: ensureTripsState(),
+        };
+        downloadTextFile(backupFileName(), JSON.stringify(payload, null, 2));
+        showToast("已下載備份檔");
+      } catch (error) {
+        showToast("未能建立備份檔");
+      }
+    }
+
+    function sanitizeHtml(html) {
+      const template = document.createElement("template");
+      template.innerHTML = String(html || "");
+      template.content.querySelectorAll("script, style, iframe, object, embed, link, meta").forEach((node) => node.remove());
+      template.content.querySelectorAll("*").forEach((node) => {
+        [...node.attributes].forEach((attribute) => {
+          const name = attribute.name.toLowerCase();
+          const value = attribute.value.trim().toLowerCase();
+          if (name.startsWith("on") || name === "srcdoc" || ((name === "href" || name === "src") && value.startsWith("javascript:"))) {
+            node.removeAttribute(attribute.name);
+          }
+        });
+      });
+      return template.innerHTML;
+    }
+
+    function sanitizeBackupData(data) {
+      const clean = {};
+      Object.entries(data || {}).forEach(([key, value]) => {
+        if (typeof value === "string") {
+          clean[key] = sanitizeHtml(value);
+        } else if (typeof value === "boolean") {
+          clean[key] = value;
+        }
+      });
+      return clean;
+    }
+
+    function sanitizeTripsState(rawState) {
+      if (!rawState?.trips || typeof rawState.trips !== "object") return null;
+      const cleanState = { currentTripId: "", trips: {} };
+      Object.entries(rawState.trips).forEach(([id, trip]) => {
+        if (!trip?.data) return;
+        const safeId = String(trip.id || id).replace(/[^\w-]/g, "").slice(0, 48) || `trip-${Date.now()}`;
+        cleanState.trips[safeId] = {
+          id: safeId,
+          name: sanitizeHtml(trip.name || "匯入行程表").replace(/<[^>]*>/g, "").slice(0, 80) || "匯入行程表",
+          updatedAt: new Date().toISOString(),
+          data: sanitizeBackupData(trip.data),
+        };
+      });
+      const ids = Object.keys(cleanState.trips);
+      if (!ids.length) return null;
+      cleanState.currentTripId = cleanState.trips[rawState.currentTripId] ? rawState.currentTripId : ids[0];
+      return cleanState;
+    }
+
+    function restoreTripsState(state) {
+      currentTripId = state.currentTripId;
+      saveTripsState(state);
+      const trip = state.trips[currentTripId];
+      applyData(trip.data);
+      if (tripNameInput) tripNameInput.value = trip.name || defaultTripName();
+      prepareEditableFields();
+      ensureAttachmentNote();
+      renderTripSelect(state);
+    }
+
+    function importBackupFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ""));
+          const rawState = parsed?.state?.trips ? parsed.state : parsed;
+          const state = sanitizeTripsState(rawState);
+          if (!state) throw new Error("Invalid backup");
+          if (!window.confirm("匯入備份會取代此裝置瀏覽器內現有行程表。只應匯入自己信任的備份檔。是否繼續？")) return;
+          restoreTripsState(state);
+          showToast("已匯入備份");
+        } catch (error) {
+          showToast("備份檔格式不正確");
+        }
+      };
+      reader.readAsText(file);
     }
 
     function scheduleSave() {
@@ -2906,6 +3031,8 @@
       if (action === "print") printPdf();
       if (action === "reset") resetData();
       if (action === "save-trip") saveCurrentTrip({ silent: false });
+      if (action === "export-backup") exportBackup();
+      if (action === "import-backup") backupInput.click();
       if (action === "new-trip") createNewTrip();
       if (action === "delete-trip") deleteCurrentTrip();
       if (action === "add-day") addDay();
@@ -2970,6 +3097,11 @@
     });
 
     tripNameInput?.addEventListener("input", scheduleSave);
+
+    backupInput.addEventListener("change", (event) => {
+      importBackupFile(event.target.files[0]);
+      event.target.value = "";
+    });
 
     screenshotInput.addEventListener("change", (event) => {
       addScreenshots(event.target.files);
