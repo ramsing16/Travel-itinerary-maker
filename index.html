@@ -103,6 +103,22 @@
       line-height: 1.35;
     }
 
+    .privacy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      width: fit-content;
+      margin-top: 5px;
+      padding: 4px 7px;
+      border: 1px solid #c8dfd9;
+      border-radius: 999px;
+      background: #edf7f4;
+      color: #1f6558;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
     .top-actions,
     .bottom-actions {
       display: flex;
@@ -281,6 +297,58 @@
       width: min(1180px, 100%);
       margin: 0 auto;
       padding: 22px 14px 40px;
+    }
+
+    .privacy-panel {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      width: min(1180px, calc(100% - 28px));
+      margin: 18px auto 0;
+      padding: 15px;
+      border: 1px solid #c8dfd9;
+      border-radius: var(--radius);
+      background: #fbfefd;
+      box-shadow: 0 1px 0 rgba(24, 32, 38, .03);
+    }
+
+    .privacy-icon {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border-radius: 8px;
+      background: #dff1ec;
+      color: #1f6558;
+    }
+
+    .privacy-panel h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .privacy-panel p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .privacy-list {
+      display: grid;
+      gap: 5px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .privacy-list li::before {
+      color: #1f6558;
+      font-weight: 900;
+      content: "✓ ";
     }
 
     .section-title {
@@ -1260,6 +1328,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .privacy-panel {
+        grid-template-columns: 1fr;
+      }
+
       .day-head {
         grid-template-columns: 68px 1fr;
       }
@@ -1458,6 +1530,7 @@
       <div class="brand">
         <strong contenteditable="true" data-save="trip-title">北海道自駕行程表</strong>
         <span contenteditable="true" data-save="trip-subtitle">2026年6月29日 - 7月4日 | 札幌・小樽・富良野・積丹</span>
+        <span class="privacy-pill">私人本機儲存</span>
       </div>
       <div class="top-actions">
         <div class="trip-manager">
@@ -1497,6 +1570,21 @@
           <div class="stat"><b contenteditable="true" data-save="stat-theme">花田・海岸</b><span>行程重點</span></div>
         </div>
       </aside>
+    </section>
+
+    <section class="privacy-panel" aria-labelledby="privacy-heading">
+      <div class="privacy-icon">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2"/><path d="M5 10h14v11H5z"/><path d="M12 15v2"/></svg>
+      </div>
+      <div>
+        <h2 id="privacy-heading">私人本機行程</h2>
+        <p>每位訪客的修改、建立行程和上載截圖，只會儲存在自己目前裝置的瀏覽器。GitHub Pages 不會接收、同步或公開你的行程內容。</p>
+        <ul class="privacy-list">
+          <li>其他人打開同一網址，只會看到公開範本和他們自己裝置內的資料。</li>
+          <li>同一部手機或電腦若共用同一個瀏覽器，仍可能看到該瀏覽器保存的行程。</li>
+          <li>AI 生成只有在你填寫 API 端點並按下按鈕時，才會把輸入內容送到該端點。</li>
+        </ul>
+      </div>
     </section>
 
     <main>
@@ -2395,7 +2483,7 @@
         state.currentTripId = currentTripId;
         saveTripsState(state);
         renderTripSelect(state);
-        if (!silent) showToast("已儲存行程表");
+        if (!silent) showToast("已儲存在此裝置");
       } catch (error) {
         showToast("截圖太多或太大，請刪除部分圖片後再試");
       }
@@ -2433,7 +2521,7 @@
       prepareEditableFields();
       ensureAttachmentNote();
       renderTripSelect(nextState);
-      showToast("已切換行程表");
+      showToast("已切換此裝置的行程表");
     }
 
     function createNewTrip() {
@@ -2453,7 +2541,7 @@
       };
       saveTripsState(state);
       renderTripSelect(state);
-      showToast("已建立新行程表");
+      showToast("已在此裝置建立新行程表");
     }
 
     function deleteCurrentTrip() {
@@ -2475,7 +2563,7 @@
       prepareEditableFields();
       ensureAttachmentNote();
       renderTripSelect(state);
-      showToast("已刪除行程表");
+      showToast("已刪除此裝置的行程表");
     }
 
     function showToast(message) {
@@ -2790,7 +2878,7 @@
     }
 
     function resetData() {
-      const confirmed = window.confirm("重置會清除所有已儲存行程表、清單和截圖。是否繼續？");
+      const confirmed = window.confirm("重置只會清除此裝置瀏覽器內的所有行程表、清單和截圖。是否繼續？");
       if (!confirmed) return;
       window.localStorage.removeItem(storageKey);
       window.localStorage.removeItem(tripsStorageKey);
