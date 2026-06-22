@@ -1,0 +1,2943 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>北海道自駕行程表 PDF 製作器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182026;
+      --muted: #61707d;
+      --line: #d9e0e5;
+      --paper: #ffffff;
+      --mist: #f4f7f8;
+      --sky: #d8eef2;
+      --forest: #22554b;
+      --blue: #1f6f91;
+      --coral: #c45745;
+      --ochre: #b77627;
+      --shadow: 0 16px 42px rgba(24, 32, 38, .12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--mist);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    [contenteditable="true"] {
+      outline: 2px solid transparent;
+      border-radius: 4px;
+    }
+
+    [contenteditable="true"]:focus {
+      outline-color: rgba(31, 111, 145, .28);
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .editable-placeholder {
+      color: var(--muted);
+      opacity: .72;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding-bottom: 88px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(244, 247, 248, .92);
+      border-bottom: 1px solid rgba(217, 224, 229, .9);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand strong {
+      display: block;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .brand span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .top-actions,
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trip-manager {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: min(520px, 48vw);
+    }
+
+    .trip-select,
+    .trip-name-input {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 6px 9px;
+    }
+
+    .trip-select {
+      min-width: 140px;
+    }
+
+    .trip-name-input {
+      min-width: 160px;
+      flex: 1;
+    }
+
+    .icon-btn,
+    .command-btn {
+      min-height: 42px;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 1px 0 rgba(24, 32, 38, .08), inset 0 0 0 1px rgba(24, 32, 38, .1);
+    }
+
+    .icon-btn {
+      display: grid;
+      width: 42px;
+      place-items: center;
+    }
+
+    .icon-btn.danger {
+      background: #fff4f2;
+      color: var(--coral);
+    }
+
+    .command-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 13px;
+      font-weight: 750;
+    }
+
+    .command-btn.primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .command-btn.danger {
+      color: var(--coral);
+    }
+
+    .command-btn.secondary {
+      background: #eef4f5;
+      color: var(--blue);
+    }
+
+    .icon {
+      width: 19px;
+      height: 19px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      min-height: 420px;
+      background:
+        linear-gradient(90deg, rgba(8, 29, 32, .86), rgba(8, 29, 32, .52) 56%, rgba(8, 29, 32, .18)),
+        url("assets/flight-public.jpeg") center 24% / cover no-repeat;
+      color: #fff;
+    }
+
+    .hero-copy {
+      align-self: end;
+      max-width: 760px;
+      padding: clamp(32px, 7vw, 72px) clamp(18px, 5vw, 68px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, .86);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .eyebrow::before {
+      width: 32px;
+      height: 2px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 66px);
+      line-height: .98;
+      letter-spacing: 0;
+    }
+
+    .hero-copy p {
+      max-width: 620px;
+      margin: 18px 0 0;
+      color: rgba(255, 255, 255, .9);
+      font-size: clamp(16px, 2.5vw, 20px);
+      line-height: 1.65;
+    }
+
+    .hero-panel {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      gap: 12px;
+      padding: clamp(18px, 3vw, 36px);
+      background: rgba(255, 255, 255, .1);
+      border-left: 1px solid rgba(255, 255, 255, .22);
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-height: 88px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, .26);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .14);
+    }
+
+    .stat b {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 6px;
+      color: rgba(255, 255, 255, .76);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 22px 14px 40px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 26px 0 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.15;
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: right;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    .panel,
+    .day-card,
+    .flight-card,
+    .route-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 1px 0 rgba(24, 32, 38, .03);
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .flight-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flight-card {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .flight-date {
+      display: grid;
+      min-height: 72px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--sky);
+      color: #123640;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+
+    .flight-date small {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .flight-main {
+      min-width: 0;
+    }
+
+    .flight-main h3,
+    .panel h3,
+    .route-card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      line-height: 1.25;
+    }
+
+    .flight-line {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 10px;
+      align-items: baseline;
+      margin-top: 5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .flight-line b {
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eef4f5;
+      color: #294049;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .chip.food {
+      background: #f7eadb;
+      color: #6a3e13;
+    }
+
+    .chip.drive {
+      background: #e9f2e8;
+      color: #234b31;
+    }
+
+    .chip.hotel {
+      background: #edf0f8;
+      color: #263c6d;
+    }
+
+    .hotel-list,
+    .memo-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hotel-list li,
+    .memo-list li {
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hotel-list b,
+    .memo-list b {
+      color: var(--ink);
+    }
+
+    .mini-icon {
+      display: inline-grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border-radius: 50%;
+      background: #eef4f5;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .route-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .route-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 132px;
+      padding: 14px;
+    }
+
+    .route-card::after {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      width: 64px;
+      height: 64px;
+      border: 18px solid rgba(31, 111, 145, .12);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .route-card time {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .route-card p {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .days {
+      display: grid;
+      gap: 14px;
+    }
+
+    .day-card {
+      overflow: clip;
+    }
+
+    .day-head {
+      display: grid;
+      grid-template-columns: 82px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      background: linear-gradient(90deg, #fff, #f7fafb);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-date {
+      position: relative;
+      display: grid;
+      min-height: 68px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--forest);
+      color: #fff;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 850;
+      line-height: 1.05;
+    }
+
+    .day-date small {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: .82;
+    }
+
+    .day-date:focus {
+      background: var(--forest);
+      color: #fff;
+      outline-color: rgba(31, 111, 145, .42);
+    }
+
+    .day-date.editable-placeholder,
+    .day-date:focus small {
+      color: #fff;
+    }
+
+    .date-picker {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      opacity: 0;
+      pointer-events: auto;
+    }
+
+    .add-day-panel {
+      display: flex;
+      justify-content: center;
+      padding: 2px 0 8px;
+    }
+
+    .day-title {
+      min-width: 0;
+    }
+
+    .day-title h3 {
+      margin: 0;
+      font-size: clamp(18px, 3vw, 24px);
+      line-height: 1.2;
+    }
+
+    .day-title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .day-note[data-note-color="hotel"] {
+      color: #263c6d;
+    }
+
+    .item-note[data-note-color="hotel"] {
+      color: #263c6d;
+    }
+
+    .day-note[data-note-color="transport"] {
+      color: var(--blue);
+    }
+
+    .item-note[data-note-color="transport"] {
+      color: var(--blue);
+    }
+
+    .day-note[data-note-color="food"] {
+      color: #7a4310;
+    }
+
+    .item-note[data-note-color="food"] {
+      color: #7a4310;
+    }
+
+    .day-note[data-note-color="important"] {
+      color: var(--coral);
+    }
+
+    .item-note[data-note-color="important"] {
+      color: var(--coral);
+    }
+
+    .day-note::before,
+    .item-note::before {
+      display: inline;
+      margin-right: 4px;
+      font-weight: 850;
+    }
+
+    .day-note[data-note-color="hotel"]::before,
+    .item-note[data-note-color="hotel"]::before {
+      content: "住宿：";
+    }
+
+    .day-note[data-note-color="transport"]::before,
+    .item-note[data-note-color="transport"]::before {
+      content: "航班 / 交通：";
+    }
+
+    .day-note[data-note-color="food"]::before,
+    .item-note[data-note-color="food"]::before {
+      content: "美食 / 訂位：";
+    }
+
+    .day-note[data-note-color="important"]::before,
+    .item-note[data-note-color="important"]::before {
+      content: "重要提醒：";
+    }
+
+    .color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .item-color-row {
+      margin-top: 8px;
+    }
+
+    .item-color-row .color-dot {
+      width: 24px;
+      height: 24px;
+    }
+
+    .item-color-row .color-dot::after {
+      width: 8px;
+      height: 8px;
+    }
+
+    .color-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: -2px 0 12px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .legend-swatch[data-note-color="hotel"] {
+      background: #6374a6;
+    }
+
+    .legend-swatch[data-note-color="transport"] {
+      background: var(--blue);
+    }
+
+    .legend-swatch[data-note-color="food"] {
+      background: var(--ochre);
+    }
+
+    .legend-swatch[data-note-color="important"] {
+      background: var(--coral);
+    }
+
+    .color-dot {
+      position: relative;
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px rgba(24, 32, 38, .18);
+    }
+
+    .color-dot::after {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0;
+      content: "";
+    }
+
+    .color-dot.active::after {
+      opacity: 1;
+    }
+
+    .color-dot[data-note-color="hotel"] {
+      background: #6374a6;
+    }
+
+    .color-dot[data-note-color="transport"] {
+      background: var(--blue);
+    }
+
+    .color-dot[data-note-color="food"] {
+      background: var(--ochre);
+    }
+
+    .color-dot[data-note-color="important"] {
+      background: var(--coral);
+    }
+
+    .day-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 0;
+      padding: 0;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 78px 1fr auto;
+      gap: 14px;
+      align-items: start;
+      padding: 16px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+    }
+
+    .item-time {
+      color: var(--blue);
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.25;
+    }
+
+    .item-body {
+      min-width: 0;
+    }
+
+    .item-body h4 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .item-body p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .delete-item {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 8px;
+      background: #fff4f2;
+      color: var(--coral);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel-head h3 {
+      margin: 0;
+    }
+
+    .compact-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: #eef4f5;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(31, 111, 145, .12);
+    }
+
+    .compact-btn .icon {
+      width: 17px;
+      height: 17px;
+    }
+
+    .delete-memo,
+    .delete-attachment,
+    .delete-flight-shot {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 8px;
+      background: #fff4f2;
+      color: var(--coral);
+    }
+
+    .delete-attachment {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      background: rgba(255, 244, 242, .95);
+      box-shadow: 0 2px 8px rgba(24, 32, 38, .14);
+    }
+
+    .delete-flight-shot {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      background: rgba(255, 244, 242, .96);
+      color: var(--coral);
+      box-shadow: 0 2px 8px rgba(24, 32, 38, .14);
+    }
+
+    .delete-memo .icon,
+    .delete-attachment .icon,
+    .delete-flight-shot .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .photo-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      background: #fff;
+    }
+
+    .photo-panel img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      object-position: top center;
+    }
+
+    .zoomable-image {
+      cursor: zoom-in;
+    }
+
+    .upload-category-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0 14px;
+    }
+
+    .upload-category {
+      display: grid;
+      gap: 8px;
+      align-content: center;
+      min-height: 104px;
+      padding: 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f7fafb;
+      color: var(--ink);
+      text-align: left;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7);
+    }
+
+    .upload-category[data-category="機票"] {
+      background: #eef4ff;
+      border-color: #cbdaf8;
+    }
+
+    .upload-category[data-category="酒店"] {
+      background: #eef7f5;
+      border-color: #c7dfd8;
+    }
+
+    .upload-category[data-category="租車"] {
+      background: #fff6e8;
+      border-color: #ecd4ad;
+    }
+
+    .upload-category[data-category="球票"] {
+      background: #f3efff;
+      border-color: #d9cff5;
+    }
+
+    .upload-category[data-category="餐廳"] {
+      background: #fff0ed;
+      border-color: #edc8c1;
+    }
+
+    .upload-category b {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .upload-category span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .category-icon {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--blue);
+      box-shadow: inset 0 0 0 1px rgba(31, 111, 145, .14);
+    }
+
+    .upload-category[data-category="機票"] .category-icon,
+    .attachment-category[data-category="機票"] {
+      background: #dfeaff;
+      color: #2d559b;
+    }
+
+    .upload-category[data-category="酒店"] .category-icon,
+    .attachment-category[data-category="酒店"] {
+      background: #dff1ec;
+      color: #1f6558;
+    }
+
+    .upload-category[data-category="租車"] .category-icon,
+    .attachment-category[data-category="租車"] {
+      background: #ffe7bc;
+      color: #88560d;
+    }
+
+    .upload-category[data-category="球票"] .category-icon,
+    .attachment-category[data-category="球票"] {
+      background: #e8ddff;
+      color: #5b438e;
+    }
+
+    .upload-category[data-category="餐廳"] .category-icon,
+    .attachment-category[data-category="餐廳"] {
+      background: #ffe0da;
+      color: #9d4234;
+    }
+
+    .category-icon .icon {
+      width: 17px;
+      height: 17px;
+    }
+
+    .attachment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .attachment-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      break-inside: avoid;
+    }
+
+    .attachment-card img {
+      display: block;
+      width: 100%;
+      min-height: 260px;
+      max-height: 620px;
+      object-fit: contain;
+      background: #f7fafb;
+    }
+
+    .attachment-caption {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .attachment-caption span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .field-input {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 9px;
+    }
+
+    .attachment-category {
+      justify-self: start;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eef4f5;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .ai-endpoint-input {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+    }
+
+    .plan-import {
+      margin-top: 18px;
+    }
+
+    .plan-import-grid {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .plan-textarea {
+      width: 100%;
+      min-height: 210px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    .plan-tools {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .plan-tools p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .empty-note {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding: 18px;
+      border: 1px dashed #b8c7cf;
+      border-radius: var(--radius);
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .bottom-actions {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      left: 12px;
+      z-index: 25;
+      justify-content: center;
+      padding: 10px;
+      border: 1px solid rgba(217, 224, 229, .92);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .94);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .bottom-actions .command-btn {
+      flex: 1;
+      justify-content: center;
+      max-width: 220px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 86px;
+      z-index: 30;
+      max-width: calc(100vw - 36px);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #182026;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(12, 18, 22, .88);
+    }
+
+    .lightbox.show {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 86vh;
+      border-radius: 8px;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .95);
+      color: var(--ink);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: 560px;
+      }
+
+      .hero-panel {
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, .22);
+      }
+
+      .overview-grid,
+      .route-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .section-title p {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .brand {
+        width: 100%;
+      }
+
+      .top-actions {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .trip-manager {
+        min-width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .trip-select,
+      .trip-name-input {
+        flex: 1 1 150px;
+      }
+
+      .hero {
+        min-height: 520px;
+      }
+
+      .hero-copy {
+        padding-top: 44px;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .day-head {
+        grid-template-columns: 68px 1fr;
+      }
+
+      .day-actions {
+        grid-column: 1 / -1;
+        justify-content: end;
+      }
+
+      .item {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .delete-item {
+        grid-column: 2;
+        justify-self: end;
+      }
+
+      .memo-list li {
+        grid-template-columns: 22px 1fr 28px;
+      }
+
+      .attachment-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .upload-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .upload-category {
+        min-height: 96px;
+      }
+
+      .flight-card {
+        grid-template-columns: 62px 1fr;
+      }
+
+      .flight-line {
+        grid-template-columns: 54px 1fr;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 11mm;
+      }
+
+      :root {
+        --shadow: none;
+      }
+
+      body {
+        background: #fff;
+        color: #111;
+        font-size: 11px;
+      }
+
+      .app {
+        padding-bottom: 0;
+      }
+
+      .topbar,
+      .bottom-actions,
+      .plan-import,
+      .day-actions,
+      .delete-item,
+      .delete-memo,
+      .delete-attachment,
+      .delete-flight-shot,
+      .color-row,
+      .compact-btn,
+      #screenshot-input,
+      .lightbox,
+      .toast {
+        display: none !important;
+      }
+
+      .hero {
+        min-height: auto;
+        grid-template-columns: 1fr 260px;
+        break-inside: avoid;
+        color: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .hero-copy {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .hero-copy p {
+        font-size: 12px;
+      }
+
+      .hero-panel {
+        padding: 16px;
+      }
+
+      main {
+        width: 100%;
+        padding: 10px 0 0;
+      }
+
+      .section-title {
+        margin: 14px 0 7px;
+      }
+
+      .section-title h2 {
+        font-size: 18px;
+      }
+
+      .overview-grid,
+      .route-strip {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .route-strip {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .panel,
+      .day-card,
+      .flight-card,
+      .route-card {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .days {
+        gap: 8px;
+      }
+
+      .day-card {
+        page-break-inside: avoid;
+      }
+
+      .day-head {
+        grid-template-columns: 62px 1fr;
+        padding: 9px;
+      }
+
+      .day-date {
+        min-height: 52px;
+      }
+
+      .day-title h3 {
+        font-size: 16px;
+      }
+
+      .day-title p,
+      .item-body p,
+      .route-card p,
+      .flight-line {
+        font-size: 10px;
+      }
+
+      .item {
+        grid-template-columns: 56px 1fr;
+        padding: 9px;
+        gap: 8px;
+      }
+
+      .item-body h4,
+      .flight-main h3,
+      .panel h3,
+      .route-card h3 {
+        font-size: 12px;
+      }
+
+      .chip {
+        min-height: 22px;
+        padding: 3px 6px;
+        font-size: 9px;
+      }
+
+      .attachment-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .attachment-card img {
+        max-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <strong contenteditable="true" data-save="trip-title">北海道自駕行程表</strong>
+        <span contenteditable="true" data-save="trip-subtitle">2026年6月29日 - 7月4日 | 札幌・小樽・富良野・積丹</span>
+      </div>
+      <div class="top-actions">
+        <div class="trip-manager">
+          <select class="trip-select" id="trip-select" aria-label="選擇行程表"></select>
+          <input class="trip-name-input" id="trip-name-input" type="text" value="北海道自駕行程表" aria-label="行程表名稱">
+          <button class="icon-btn" type="button" data-action="save-trip" title="儲存行程表" aria-label="儲存行程表">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+          </button>
+          <button class="icon-btn" type="button" data-action="new-trip" title="另存新行程表" aria-label="另存新行程表">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button class="icon-btn danger" type="button" data-action="delete-trip" title="刪除行程表" aria-label="刪除行程表">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
+        </button>
+        <button class="command-btn primary" type="button" data-action="print">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          PDF
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow" contenteditable="true" data-save="hero-eyebrow">HKG ⇄ CTS</div>
+        <h1 contenteditable="true" data-save="hero-title">北海道夏日自駕</h1>
+        <p contenteditable="true" data-save="hero-copy">以札幌作基地，串起小樽運河、ES CON Field、富良野花田、美瑛青池與積丹海岸；行程節奏預留購物、餐廳和車程緩衝。</p>
+      </div>
+      <aside class="hero-panel">
+        <div class="stat-grid">
+          <div class="stat"><b contenteditable="true" data-save="stat-days">6日5夜</b><span>旅程長度</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-drive">約720km</b><span>預估自駕</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-hotels">2間酒店</b><span>住宿安排</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-theme">花田・海岸</b><span>行程重點</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <main>
+      <section aria-labelledby="overview-heading">
+        <div class="section-title">
+          <h2 id="overview-heading">旅程總覽</h2>
+          <p contenteditable="true" data-save="overview-note">航班時間以截圖為準；球賽、餐廳和泊車請出發前再核對。</p>
+        </div>
+        <div class="overview-grid">
+          <div class="flight-stack">
+            <article class="flight-card">
+              <div class="flight-date">6/29<small>週一</small></div>
+              <div class="flight-main">
+                <h3 contenteditable="true" data-save="flight-out-title">去程：香港 HKG → 新千歲 CTS</h3>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-out-start">08:45</b><span contenteditable="true" data-save="flight-out-from">香港國際機場 T2</span></div>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-out-end">14:55</b><span contenteditable="true" data-save="flight-out-to">新千歲機場・HX690 香港航空・約5小時10分</span></div>
+                <div class="chip-row">
+                  <span class="chip drive" contenteditable="true" data-save="flight-out-transfer">機場 → 札幌：約50分鐘</span>
+                  <span class="chip food" contenteditable="true" data-save="flight-out-food">晚餐：湯咖喱 / 迴轉壽司</span>
+                </div>
+              </div>
+            </article>
+            <article class="flight-card">
+              <div class="flight-date">7/4<small>週六</small></div>
+              <div class="flight-main">
+                <h3 contenteditable="true" data-save="flight-back-title">回程：新千歲 CTS → 香港 HKG</h3>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-back-start">15:55</b><span contenteditable="true" data-save="flight-back-from">新千歲機場</span></div>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-back-end">20:45</b><span contenteditable="true" data-save="flight-back-to">香港國際機場 T1・HX691 香港航空・約5小時50分</span></div>
+                <div class="chip-row">
+                  <span class="chip drive" contenteditable="true" data-save="flight-back-buffer">建議 12:45 前到機場</span>
+                  <span class="chip food" contenteditable="true" data-save="flight-back-food">午餐：機場拉麵道 / 札幌站</span>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div class="panel">
+            <h3>住宿與備註</h3>
+            <ul class="hotel-list">
+              <li><span class="mini-icon">1</span><span contenteditable="true" data-save="hotel-1"><b>6/29、6/30、7/2、7/3：</b>Mitsui Garden Hotel Sapporo West（三井花園酒店札幌西）</span></li>
+              <li><span class="mini-icon">2</span><span contenteditable="true" data-save="hotel-2"><b>7/1：</b>NOZO Hotel Furano，方便翌日早上去富田農場與美瑛。</span></li>
+              <li><span class="mini-icon">P</span><span contenteditable="true" data-save="hotel-3"><b>自駕：</b>6/30 早上札幌取車，7/4 中午前還車或直接機場還車。</span></li>
+              <li><span class="mini-icon">¥</span><span contenteditable="true" data-save="hotel-4"><b>現金：</b>積丹、停車場和部分食店預留日圓現金。</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="route-heading">
+        <div class="section-title">
+          <h2 id="route-heading">車程路線</h2>
+          <p contenteditable="true" data-save="route-note">時間為一般夏季路況估算，雨天或假日請加 20-40 分鐘。</p>
+        </div>
+        <div class="route-strip">
+          <article class="route-card">
+            <time>6/29</time>
+            <h3 contenteditable="true" data-save="route-1-title">CTS → 札幌</h3>
+            <p contenteditable="true" data-save="route-1-body">約50分鐘。首日以入城、Check-in、狸小路和大通附近晚餐為主。</p>
+          </article>
+          <article class="route-card">
+            <time>6/30</time>
+            <h3 contenteditable="true" data-save="route-2-title">札幌 → 小樽 → 北廣島</h3>
+            <p contenteditable="true" data-save="route-2-body">約45分鐘 + 約70分鐘。小樽午餐後前往 ES CON Field。</p>
+          </article>
+          <article class="route-card">
+            <time>7/1</time>
+            <h3 contenteditable="true" data-save="route-3-title">札幌 → 富良野</h3>
+            <p contenteditable="true" data-save="route-3-body">約2小時15分鐘。下午先行花田與森林精靈露台。</p>
+          </article>
+          <article class="route-card">
+            <time>7/2</time>
+            <h3 contenteditable="true" data-save="route-4-title">富良野 → 美瑛 → 札幌</h3>
+            <p contenteditable="true" data-save="route-4-body">約3小時車程分段完成。清晨去富田農場，避開人潮。</p>
+          </article>
+          <article class="route-card">
+            <time>7/3</time>
+            <h3 contenteditable="true" data-save="route-5-title">札幌 → 積丹 → 小樽</h3>
+            <p contenteditable="true" data-save="route-5-body">約2小時20分鐘到神威岬；回程視體力加插小樽。</p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="days-heading">
+        <div class="section-title">
+          <h2 id="days-heading">每日行程</h2>
+          <p contenteditable="true" data-save="days-note">餐廳可按訂位、球賽開場和天氣即日調整。</p>
+        </div>
+        <div class="color-legend" aria-label="顏色代表">
+          <span class="legend-item"><span class="legend-swatch" data-note-color="hotel"></span>住宿</span>
+          <span class="legend-item"><span class="legend-swatch" data-note-color="transport"></span>航班 / 交通</span>
+          <span class="legend-item"><span class="legend-swatch" data-note-color="food"></span>美食 / 訂位</span>
+          <span class="legend-item"><span class="legend-swatch" data-note-color="important"></span>重要提醒</span>
+        </div>
+        <div class="days" id="days">
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-1-date" data-date-field data-date-iso="2026-06-29" role="button" tabindex="0">6/29<small>週一</small><input class="date-picker" type="date" value="2026-06-29" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-1-title">抵達札幌・市內購物飲食</h3>
+                <p class="day-note" contenteditable="true" data-save="day-1-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d1-t1">14:55</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d1-h1">抵達新千歲機場</h4><p contenteditable="true" data-save="d1-p1">入境、取行李，購買飲品或簡單甜點；如首日不取車，可乘 JR 快速 Airport 入札幌。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d1-c1">CTS → 札幌：約37-50分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d1-t2">17:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d1-h2">酒店 Check-in・大通 / 狸小路</h4><p contenteditable="true" data-save="d1-p2">附近有札幌站商場、AOAO SAPPORO、狸小路藥妝與便利購物點。</p><div class="chip-row"><span class="chip hotel" contenteditable="true" data-save="d1-c2">三井花園酒店札幌西</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d1-t3">19:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d1-h3">晚餐：湯咖喱或迴轉壽司</h4><p contenteditable="true" data-save="d1-p3">建議 Suage+、GARAKU、根室花丸或 Toriton；晚飯後到大通公園散步。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d1-c3">札幌湯咖喱 / 迴轉壽司</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-2-date" data-date-field data-date-iso="2026-06-30" role="button" tabindex="0">6/30<small>週二</small><input class="date-picker" type="date" value="2026-06-30" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-2-title">小樽散策・ES CON Field 球賽</h3>
+                <p class="day-note" contenteditable="true" data-save="day-2-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d2-t1">09:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d2-h1">札幌取車・出發往小樽</h4><p contenteditable="true" data-save="d2-p1">建議先確認 ETC、雪胎不用但要檢查保險、導航語言和泊車方式。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d2-c1">札幌 → 小樽：約45分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d2-t2">10:15</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d2-h2">小樽運河・堺町通</h4><p contenteditable="true" data-save="d2-p2">北一硝子、音樂盒堂、LeTAO；午餐可選三角市場海鮮丼或若雞時代 Narutoa。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d2-c2">海鮮丼 / 若雞半身揚</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d2-t3">14:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d2-h3">前往 ES CON Field Hokkaido</h4><p contenteditable="true" data-save="d2-p3">F Village 可早到逛商店、餐飲和球場周邊；球賽時間以票面為準。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d2-c3">小樽 → 北廣島：約1小時10分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d2-t4">18:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d2-h4">觀看北海道日本火腿鬥士球賽</h4><p contenteditable="true" data-save="d2-p4">賽後回札幌約40-50分鐘；如泊車滿額，預留排隊離場時間。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d2-c4">球場餐飲 / 札幌宵夜拉麵</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-3-date" data-date-field data-date-iso="2026-07-01" role="button" tabindex="0">7/1<small>週三</small><input class="date-picker" type="date" value="2026-07-01" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-3-title">札幌出發・富良野花田</h3>
+                <p class="day-note" contenteditable="true" data-save="day-3-hotel" data-note-color="hotel">住宿：NOZO Hotel Furano</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d3-t1">08:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d3-h1">札幌 → 富良野</h4><p contenteditable="true" data-save="d3-p1">途中可在砂川 Highway Oasis 休息買零食；夏天美瑛一帶日落較遲，可放慢走。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d3-c1">約2小時15分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d3-t2">11:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d3-h2">午餐：富良野咖喱蛋包飯</h4><p contenteditable="true" data-save="d3-p2">建議 Kumagera、唯我獨尊或富良野起司工房附近簡餐；熱門店請預留等位。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d3-c2">咖喱 / 和牛丼 / 起司甜點</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d3-t3">13:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d3-h3">富田農場・薰衣草花田</h4><p contenteditable="true" data-save="d3-p3">7月初有早開薰衣草與彩色花田；試薰衣草雪糕，並避開正午最熱時段。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d3-c3">Farm Tomita</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d3-t4">16:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d3-h4">森林精靈露台・富良野市區</h4><p contenteditable="true" data-save="d3-p4">傍晚光線柔和；晚餐可在酒店附近或富良野市區處理。</p><div class="chip-row"><span class="chip hotel" contenteditable="true" data-save="d3-c4">NOZO Hotel Furano</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-4-date" data-date-field data-date-iso="2026-07-02" role="button" tabindex="0">7/2<small>週四</small><input class="date-picker" type="date" value="2026-07-02" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-4-title">美瑛青池・四季彩之丘・返回札幌</h3>
+                <p class="day-note" contenteditable="true" data-save="day-4-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d4-t1">08:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d4-h1">再訪富田農場或直上美瑛</h4><p contenteditable="true" data-save="d4-p1">想拍少人花田可早起；否則直接去青池，停車和步道較順。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d4-c1">富良野 → 青池：約55分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d4-t2">10:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d4-h2">美瑛青池・白鬚瀑布</h4><p contenteditable="true" data-save="d4-p2">青池顏色視天氣和光線而變；白鬚瀑布可順路停留約20分鐘。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d4-c2">Blue Pond / Shirahige Falls</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d4-t3">12:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d4-h3">四季彩之丘・午餐</h4><p contenteditable="true" data-save="d4-p3">彩色花帶、羊駝牧場和農場餐廳；亦可到美瑛選咖啡店。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d4-c3">農場餐廳 / 美瑛咖啡</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d4-t4">15:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d4-h4">返回札幌</h4><p contenteditable="true" data-save="d4-p4">晚餐建議成吉思汗、螃蟹或拉麵；抵達後可補購藥妝。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d4-c4">美瑛 → 札幌：約2小時30分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-5-date" data-date-field data-date-iso="2026-07-03" role="button" tabindex="0">7/3<small>週五</small><input class="date-picker" type="date" value="2026-07-03" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-5-title">積丹半島・神威岬・小樽候補</h3>
+                <p class="day-note" contenteditable="true" data-save="day-5-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d5-t1">08:00</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d5-h1">札幌 → 積丹神威岬</h4><p contenteditable="true" data-save="d5-p1">海岸路線彎多，雨霧或強風時要保守；神威岬步道單程約20-30分鐘。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d5-c1">約2小時20分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d5-t2">11:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d5-h2">午餐：積丹海膽丼</h4><p contenteditable="true" data-save="d5-p2">6-8月是積丹海膽季；熱門店如中村屋、みさき需早到或排隊。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d5-c2">海膽丼 / 海鮮定食</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d5-t3">14:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d5-h3">島武意海岸或余市 Nikka</h4><p contenteditable="true" data-save="d5-p3">天氣好選海岸景點；雨天可改余市蒸餾所或小樽咖啡甜點。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d5-c3">備案：小樽二訪</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d5-t4">18:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d5-h4">回札幌晚餐</h4><p contenteditable="true" data-save="d5-p4">建議提前預約成吉思汗 Daruma、螃蟹本家或薄野居酒屋。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d5-c4">成吉思汗 / 螃蟹 / 居酒屋</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="day-card">
+            <div class="day-head">
+              <div class="day-date" data-save="day-6-date" data-date-field data-date-iso="2026-07-04" role="button" tabindex="0">7/4<small>週六</small><input class="date-picker" type="date" value="2026-07-04" aria-label="選擇日期"></div>
+              <div class="day-title">
+                <h3 contenteditable="true" data-save="day-6-title">札幌最後購物・回程</h3>
+                <p class="day-note" contenteditable="true" data-save="day-6-hotel" data-note-color="transport">回程航班：CTS 15:55 → HKG 20:45</p>
+                <div class="color-row" data-color-row>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+                </div>
+              </div>
+              <div class="day-actions">
+                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d6-t1">09:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d6-h1">札幌站 / 大丸 / ESTA 周邊購物</h4><p contenteditable="true" data-save="d6-p1">先處理退稅、手信和行李整理；避免最後一刻塞滿行李箱。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d6-c1">手信 / 藥妝 / 百貨</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d6-t2">11:30</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d6-h2">午餐・出發往新千歲</h4><p contenteditable="true" data-save="d6-p2">可在札幌吃拉麵，或直接到新千歲機場拉麵道和 Royce Chocolate World。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d6-c2">拉麵 / 機場甜點</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d6-t3">12:45</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d6-h3">到達機場・還車 / Check-in</h4><p contenteditable="true" data-save="d6-p3">若在市內還車，改乘 JR；若機場還車，預留接駁車時間。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d6-c3">札幌 → CTS：約50分鐘</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="item">
+                <div class="item-time" contenteditable="true" data-save="d6-t4">15:55</div>
+                <div class="item-body"><h4 contenteditable="true" data-save="d6-h4">HX691 起飛回香港</h4><p contenteditable="true" data-save="d6-p4">抵達香港國際機場 T1 時間 20:45。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d6-c4">CTS → HKG：約5小時50分</span></div></div>
+                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="add-day-panel">
+          <button class="command-btn" type="button" data-action="add-day">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            新日期
+          </button>
+        </div>
+      </section>
+
+      <section aria-labelledby="memo-heading">
+        <div class="section-title">
+          <h2 id="memo-heading">出發清單與訂房門票</h2>
+          <p contenteditable="true" data-save="memo-note">把確認事項、訂房、門票、租車與航班截圖集中在這裡。</p>
+        </div>
+        <div class="overview-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>訂位與確認</h3>
+              <button class="compact-btn" type="button" data-action="add-memo">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                新增
+              </button>
+            </div>
+            <ul class="memo-list" id="memo-list">
+              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-1">ES CON Field 球票、泊車券或交通安排。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
+              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-2">租車公司、ETC、NOC 補償保險、國際車牌。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
+              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-3">積丹海膽店、札幌成吉思汗或螃蟹餐廳訂位。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
+              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-4">酒店泊車費、Check-in 時間和行李寄存安排。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>訂房 / 門票截圖</h3>
+            </div>
+            <p contenteditable="true" data-save="screenshots-note">加入酒店、球票、租車、餐廳訂位等確認截圖。</p>
+            <div class="upload-category-grid">
+              <button class="upload-category" type="button" data-action="upload-screenshot" data-category="機票">
+                <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M10.5 4.5 21 12l-10.5 7.5v-6L3 16V8l7.5 2.5z"/></svg></span>機票</b>
+                <span>航班、登機、訂單</span>
+              </button>
+              <button class="upload-category" type="button" data-action="upload-screenshot" data-category="酒店">
+                <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M3 21V8a2 2 0 0 1 2-2h6v15"/><path d="M11 11h8a2 2 0 0 1 2 2v8"/><path d="M7 10h.01M7 14h.01M15 15h.01"/></svg></span>酒店</b>
+                <span>訂房、地址、泊車</span>
+              </button>
+              <button class="upload-category" type="button" data-action="upload-screenshot" data-category="租車">
+                <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17h10"/><path d="M5 17h14l-1.5-6h-11z"/><path d="M7 17v2M17 17v2"/><path d="M8 11l1.5-4h5L16 11"/></svg></span>租車</b>
+                <span>取車、保險、還車</span>
+              </button>
+              <button class="upload-category" type="button" data-action="upload-screenshot" data-category="球票">
+                <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 7v10M16 7v10"/><path d="M4 11h4M16 13h4"/></svg></span>球票</b>
+                <span>門票、座位、入場</span>
+              </button>
+              <button class="upload-category" type="button" data-action="upload-screenshot" data-category="餐廳">
+                <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3v18"/><path d="M10 3v7a4 4 0 0 1-8 0V3"/><path d="M17 3v18"/><path d="M17 3c3 2 4 5 4 8h-4"/></svg></span>餐廳</b>
+                <span>訂位、排隊、餐單</span>
+              </button>
+            </div>
+            <input id="screenshot-input" type="file" accept="image/*" multiple hidden>
+            <div class="attachment-grid" id="attachment-grid">
+              <p class="empty-note">未加入截圖。按「加入截圖」可放入訂房、門票、租車或餐廳確認資料。</p>
+            </div>
+          </div>
+        </div>
+        <div class="overview-grid">
+          <div class="panel photo-panel full-row" id="flight-screenshot-panel">
+            <button class="delete-flight-shot" type="button" data-action="delete-flight-screenshot" title="刪除航班截圖" aria-label="刪除航班截圖"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            <img class="zoomable-image" src="assets/flight-public.jpeg" alt="已隱藏個人資料的航班資料示範圖" data-action="open-image">
+          </div>
+        </div>
+      </section>
+
+      <section class="plan-import" aria-labelledby="import-heading">
+        <div class="section-title">
+          <h2 id="import-heading">匯入計劃行程</h2>
+          <p>貼上概括行程或上載文字檔，會按日期整理成每日行程。</p>
+        </div>
+        <div class="panel plan-import-grid">
+          <textarea class="plan-textarea" id="plan-input" placeholder="例：&#10;6月29日：札幌市內購物飲食，酒店住三井西花園酒店&#10;6月30日：早上取車自駕到小樽，下午到 ES CON 看球賽&#10;7月1日：富良野，富田農場，美瑛青池"></textarea>
+          <div class="plan-tools">
+            <button class="command-btn" type="button" data-action="upload-plan">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
+              上載文字
+            </button>
+            <button class="command-btn primary" type="button" data-action="generate-plan">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+              生成行程
+            </button>
+            <input class="ai-endpoint-input" id="ai-endpoint-input" type="url" placeholder="AI API 端點，例如 /api/generate-itinerary" aria-label="AI API 端點">
+            <button class="command-btn secondary" type="button" data-action="generate-ai-plan">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+              AI 生成
+            </button>
+            <input id="plan-file-input" type="file" accept=".txt,text/plain" hidden>
+            <p>離線版本會按日期、時間、酒店、美食、交通等關鍵字整理；AI 生成按鈕已預留給日後網站接入 API 使用。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-actions" aria-label="主要操作">
+      <button class="command-btn primary" type="button" data-action="print">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+        PDF
+      </button>
+      <button class="command-btn danger" type="button" data-action="reset">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
+        重置
+      </button>
+    </nav>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <button class="lightbox-close" type="button" data-action="close-image" aria-label="關閉圖片"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      <img alt="">
+    </div>
+  </div>
+
+  <template id="item-template">
+    <div class="item">
+      <div class="item-time" contenteditable="true" data-save="" data-placeholder="時間">時間</div>
+      <div class="item-body">
+        <h4 contenteditable="true" data-save="" data-placeholder="新增景點 / 餐廳 / 車程">新增景點 / 餐廳 / 車程</h4>
+        <p contenteditable="true" data-save="" data-placeholder="填寫地址、停留時間、訂位資料或備註。">填寫地址、停留時間、訂位資料或備註。</p>
+        <div class="chip-row"><span class="chip" contenteditable="true" data-save="" data-placeholder="備註">備註</span></div>
+      </div>
+      <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+  </template>
+
+  <template id="day-template">
+    <article class="day-card">
+      <div class="day-head">
+        <div class="day-date" data-save="" data-date-field role="button" tabindex="0">日期<small>星期</small><input class="date-picker" type="date" aria-label="選擇日期"></div>
+        <div class="day-title">
+          <h3 contenteditable="true" data-save="" data-placeholder="新增行程日">新增行程日</h3>
+          <p class="day-note" contenteditable="true" data-save="" data-placeholder="住宿 / 航班 / 備註" data-note-color="hotel">住宿 / 航班 / 備註</p>
+          <div class="color-row" data-color-row>
+            <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
+            <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
+            <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+            <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
+          </div>
+        </div>
+        <div class="day-actions">
+          <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      <div class="timeline"></div>
+    </article>
+  </template>
+
+  <template id="memo-template">
+    <li>
+      <span class="mini-icon">□</span>
+      <span contenteditable="true" data-save="" data-placeholder="新增確認事項。">新增確認事項。</span>
+      <button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </li>
+  </template>
+
+  <template id="attachment-template">
+    <figure class="attachment-card">
+      <img class="zoomable-image" data-action="open-image" alt="行程附件截圖">
+      <figcaption class="attachment-caption">
+        <span class="attachment-category" data-attachment-category data-category="酒店">酒店</span>
+        <span contenteditable="true" data-save="" data-placeholder="截圖備註">截圖備註</span>
+        <button class="delete-attachment" type="button" data-action="delete-attachment" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </figcaption>
+    </figure>
+  </template>
+
+  <script>
+    const app = document.querySelector("#app");
+    const days = document.querySelector("#days");
+    const memoList = document.querySelector("#memo-list");
+    const attachmentGrid = document.querySelector("#attachment-grid");
+    const screenshotInput = document.querySelector("#screenshot-input");
+    const planInput = document.querySelector("#plan-input");
+    const planFileInput = document.querySelector("#plan-file-input");
+    const aiEndpointInput = document.querySelector("#ai-endpoint-input");
+    const tripSelect = document.querySelector("#trip-select");
+    const tripNameInput = document.querySelector("#trip-name-input");
+    const flightScreenshotPanel = document.querySelector("#flight-screenshot-panel");
+    const lightbox = document.querySelector("#lightbox");
+    const toast = document.querySelector("#toast");
+    const storageKey = "hokkaido-itinerary-maker-v1";
+    const tripsStorageKey = "hokkaido-itinerary-maker-trips-v1";
+    let pendingScreenshotCategory = "酒店";
+    let currentTripId = "default";
+    let saveTimer;
+
+    function getTripYear() {
+      const titleText = document.querySelector("[data-save='trip-subtitle']")?.textContent || "";
+      const match = titleText.match(/20\d{2}/);
+      return match ? Number(match[0]) : 2026;
+    }
+
+    function parseTripDate(text) {
+      const normalized = text.replace(/\s+/g, "");
+      const full = normalized.match(/(20\d{2})[\/.\-年](\d{1,2})[\/.\-月](\d{1,2})/);
+      const short = normalized.match(/(\d{1,2})[\/.\-月](\d{1,2})/);
+      const year = full ? Number(full[1]) : getTripYear();
+      const month = Number(full ? full[2] : short?.[1]);
+      const day = Number(full ? full[3] : short?.[2]);
+      if (!month || !day) return null;
+      const date = new Date(year, month - 1, day);
+      if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+      return { year, month, day, weekday: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][date.getDay()] };
+    }
+
+    function toDateIso(year, month, day) {
+      return [year, String(month).padStart(2, "0"), String(day).padStart(2, "0")].join("-");
+    }
+
+    function parseIsoDate(iso) {
+      const match = String(iso || "").match(/^(20\d{2})-(\d{2})-(\d{2})$/);
+      if (!match) return null;
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      const day = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+      if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+      return { year, month, day, weekday: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][date.getDay()] };
+    }
+
+    function nextDateIso() {
+      const dates = [...document.querySelectorAll(".day-date")]
+        .map((node) => parseIsoDate(node.dataset.dateIso))
+        .filter(Boolean)
+        .map(({ year, month, day }) => new Date(year, month - 1, day));
+      const base = dates.length ? new Date(Math.max(...dates.map((date) => date.getTime()))) : new Date(getTripYear(), 5, 28);
+      base.setDate(base.getDate() + 1);
+      return toDateIso(base.getFullYear(), base.getMonth() + 1, base.getDate());
+    }
+
+    function renderDateField(node, iso) {
+      const parsed = parseIsoDate(iso);
+      if (!parsed) return;
+      node.dataset.dateIso = iso;
+      node.setAttribute("role", "button");
+      node.setAttribute("tabindex", "0");
+      node.innerHTML = `${parsed.month}/${parsed.day}<small>${parsed.weekday}</small><input class="date-picker" type="date" value="${iso}" aria-label="選擇日期">`;
+    }
+
+    function openDatePicker(dayDate) {
+      const picker = dayDate.querySelector(".date-picker");
+      if (!picker) return;
+      if (typeof picker.showPicker === "function") {
+        picker.showPicker();
+      } else {
+        picker.focus();
+        picker.click();
+      }
+    }
+
+    function setPlaceholder(node) {
+      if (!node.dataset.placeholder) return;
+      node.textContent = node.dataset.placeholder;
+      node.dataset.placeholderActive = "true";
+      node.classList.add("editable-placeholder");
+    }
+
+    function syncPlaceholder(node) {
+      if (!node.dataset.placeholder) return;
+      const text = node.textContent.trim();
+      const placeholderText = node.dataset.placeholder;
+      if (!text || text === placeholderText) {
+        setPlaceholder(node);
+      } else {
+        node.dataset.placeholderActive = "false";
+        node.classList.remove("editable-placeholder");
+      }
+    }
+
+    function clearPlaceholder(node) {
+      if (node?.dataset?.placeholderActive !== "true") return;
+      node.innerHTML = "";
+      node.dataset.placeholderActive = "false";
+      node.classList.remove("editable-placeholder");
+    }
+
+    function assignDynamicKeys(scope = document) {
+      const nodes = scope.querySelectorAll("[contenteditable='true']");
+      nodes.forEach((node) => {
+        if (!node.dataset.save) {
+          node.dataset.save = `custom-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        }
+      });
+    }
+
+    function normalizeDateFields(scope = document) {
+      const dateFields = [...scope.querySelectorAll(".day-date")];
+      if (scope.matches?.(".day-date")) dateFields.unshift(scope);
+      dateFields.forEach((node, index) => {
+        node.dataset.dateField = "";
+        if (!node.dataset.save) {
+          node.dataset.save = `day-date-${index + 1}-${Date.now()}`;
+        }
+        const picker = node.querySelector(".date-picker");
+        const parsed = parseIsoDate(picker?.value) || parseIsoDate(node.dataset.dateIso) || parseTripDate(node.textContent);
+        const iso = parsed ? toDateIso(parsed.year, parsed.month, parsed.day) : nextDateIso();
+        renderDateField(node, iso);
+      });
+    }
+
+    function dayDeleteButtonMarkup() {
+      return '<button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+    }
+
+    function normalizeDayActions(scope = document) {
+      const dayCards = [...scope.querySelectorAll(".day-card")];
+      if (scope.matches?.(".day-card")) dayCards.unshift(scope);
+      dayCards.forEach((dayCard) => {
+        const actions = dayCard.querySelector(".day-actions");
+        if (!actions) return;
+        const existingDelete = actions.querySelector('[data-action="delete-day"]');
+        if (existingDelete) {
+          existingDelete.outerHTML = dayDeleteButtonMarkup();
+        } else {
+          actions.insertAdjacentHTML("beforeend", dayDeleteButtonMarkup());
+        }
+      });
+    }
+
+    function attachmentDeleteButtonMarkup() {
+      return '<button class="delete-attachment" type="button" data-action="delete-attachment" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+    }
+
+    function normalizeAttachmentActions(scope = document) {
+      const cards = [...scope.querySelectorAll(".attachment-card")];
+      if (scope.matches?.(".attachment-card")) cards.unshift(scope);
+      cards.forEach((card) => {
+        const existingDelete = card.querySelector('[data-action="delete-attachment"]');
+        if (existingDelete) {
+          existingDelete.outerHTML = attachmentDeleteButtonMarkup();
+        } else {
+          card.insertAdjacentHTML("beforeend", attachmentDeleteButtonMarkup());
+        }
+        const image = card.querySelector("img");
+        if (image) {
+          image.classList.add("zoomable-image");
+          image.dataset.action = "open-image";
+        }
+        let category = card.querySelector(".attachment-category");
+        if (category?.tagName === "SELECT") {
+          const value = category.value || "酒店";
+          category.outerHTML = attachmentCategoryMarkup(value);
+          category = card.querySelector(".attachment-category");
+        }
+        if (!category) {
+          const caption = card.querySelector(".attachment-caption");
+          caption?.insertAdjacentHTML("afterbegin", attachmentCategoryMarkup("酒店"));
+          category = card.querySelector(".attachment-category");
+        }
+        if (category) {
+          const value = category.textContent.trim() || "酒店";
+          category.textContent = value;
+          category.dataset.category = value;
+          category.dataset.attachmentCategory = "";
+        }
+      });
+    }
+
+    function attachmentCategoryMarkup(selected = "酒店") {
+      return `<span class="attachment-category" data-attachment-category data-category="${selected}">${selected}</span>`;
+    }
+
+    function colorRowMarkup(activeColor = "hotel", extraClass = "") {
+      const colors = [
+        ["hotel", "住宿", "住宿色"],
+        ["transport", "航班交通", "航班交通色"],
+        ["food", "美食訂位", "美食訂位色"],
+        ["important", "重要提醒", "重要提醒色"],
+      ];
+      const className = `color-row${extraClass ? ` ${extraClass}` : ""}`;
+      return `<div class="${className}" data-color-row>${colors.map(([value, title, label]) => (
+        `<button class="color-dot${value === activeColor ? " active" : ""}" type="button" data-action="note-color" data-note-color="${value}" title="${title}" aria-label="${label}"></button>`
+      )).join("")}</div>`;
+    }
+
+    function setNoteColor(container, color) {
+      const note = container.querySelector(".day-note, .item-note");
+      const row = container.querySelector("[data-color-row]");
+      if (!note || !row) return;
+      note.dataset.noteColor = color;
+      row.querySelectorAll(".color-dot").forEach((dot) => {
+        dot.classList.toggle("active", dot.dataset.noteColor === color);
+      });
+    }
+
+    function stripWrittenNotePrefix(note) {
+      const prefixPattern = /^(住宿|航班\s*\/\s*交通|交通|回程航班|美食\s*\/\s*訂位|美食|重要提醒)：\s*/;
+      const text = note.textContent.trim();
+      const stripped = text.replace(prefixPattern, "");
+      if (stripped !== text) note.textContent = stripped;
+    }
+
+    function normalizeNoteControls(scope = document) {
+      const dayCards = [...scope.querySelectorAll(".day-card")];
+      if (scope.matches?.(".day-card")) dayCards.unshift(scope);
+      dayCards.forEach((dayCard) => {
+        const note = dayCard.querySelector(".day-title p");
+        if (!note) return;
+        note.classList.add("day-note");
+        if (!note.dataset.noteColor) note.dataset.noteColor = "hotel";
+        stripWrittenNotePrefix(note);
+        if (!dayCard.querySelector("[data-color-row]")) {
+          note.insertAdjacentHTML("afterend", colorRowMarkup(note.dataset.noteColor));
+        }
+        setNoteColor(dayCard, note.dataset.noteColor);
+      });
+    }
+
+    function inferItemNoteColor(item) {
+      if (item.querySelector(".chip.food")) return "food";
+      if (item.querySelector(".chip.drive")) return "transport";
+      if (item.querySelector(".chip.hotel")) return "hotel";
+      return "important";
+    }
+
+    function normalizeItemNoteControls(scope = document) {
+      const items = [...scope.querySelectorAll(".item")];
+      if (scope.matches?.(".item")) items.unshift(scope);
+      items.forEach((item) => {
+        const note = item.querySelector(".item-body > p");
+        if (!note) return;
+        note.classList.add("item-note");
+        if (!note.dataset.noteColor) note.dataset.noteColor = inferItemNoteColor(item);
+        stripWrittenNotePrefix(note);
+        if (!item.querySelector("[data-color-row]")) {
+          note.insertAdjacentHTML("afterend", colorRowMarkup(note.dataset.noteColor, "item-color-row"));
+        }
+        setNoteColor(item, note.dataset.noteColor);
+      });
+    }
+
+    function prepareEditableFields(scope = document) {
+      normalizeDateFields(scope);
+      normalizeDayActions(scope);
+      normalizeNoteControls(scope);
+      normalizeItemNoteControls(scope);
+      normalizeAttachmentActions(scope);
+      assignDynamicKeys(scope);
+      scope.querySelectorAll("[data-placeholder]").forEach(syncPlaceholder);
+    }
+
+    function collectData() {
+      const data = {};
+      document.querySelectorAll("[data-save]").forEach((node) => {
+        data[node.dataset.save] = node.innerHTML;
+      });
+      data.daysMarkup = days.innerHTML;
+      data.memoMarkup = memoList.innerHTML;
+      data.attachmentsMarkup = attachmentGrid.innerHTML;
+      data.flightScreenshotHidden = Boolean(flightScreenshotPanel?.hidden);
+      return data;
+    }
+
+    function applyData(data) {
+      if (data.daysMarkup) days.innerHTML = data.daysMarkup;
+      if (data.memoMarkup) memoList.innerHTML = data.memoMarkup;
+      if (data.attachmentsMarkup) attachmentGrid.innerHTML = data.attachmentsMarkup;
+      if (flightScreenshotPanel) flightScreenshotPanel.hidden = Boolean(data.flightScreenshotHidden);
+      document.querySelectorAll("[data-save]").forEach((node) => {
+        const key = node.dataset.save;
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          node.innerHTML = data[key];
+        }
+      });
+    }
+
+    function defaultTripName() {
+      return document.querySelector("[data-save='trip-title']")?.textContent.trim() || "未命名行程表";
+    }
+
+    function loadTripsState() {
+      const raw = window.localStorage.getItem(tripsStorageKey);
+      if (!raw) return null;
+      try {
+        const state = JSON.parse(raw);
+        if (!state?.trips || typeof state.trips !== "object") return null;
+        return state;
+      } catch (error) {
+        window.localStorage.removeItem(tripsStorageKey);
+        return null;
+      }
+    }
+
+    function saveTripsState(state) {
+      window.localStorage.setItem(tripsStorageKey, JSON.stringify(state));
+    }
+
+    function createTripsStateFromCurrent() {
+      let legacyData = null;
+      const legacyRaw = window.localStorage.getItem(storageKey);
+      if (legacyRaw) {
+        try {
+          legacyData = JSON.parse(legacyRaw);
+        } catch (error) {
+          window.localStorage.removeItem(storageKey);
+        }
+      }
+      const data = legacyData || collectData();
+      const name = tripNameInput?.value.trim() || data["trip-title"]?.replace(/<[^>]*>/g, "").trim() || defaultTripName();
+      const state = {
+        currentTripId: "default",
+        trips: {
+          default: {
+            id: "default",
+            name,
+            updatedAt: new Date().toISOString(),
+            data,
+          },
+        },
+      };
+      saveTripsState(state);
+      return state;
+    }
+
+    function ensureTripsState() {
+      const state = loadTripsState() || createTripsStateFromCurrent();
+      const ids = Object.keys(state.trips);
+      if (!ids.length) return createTripsStateFromCurrent();
+      if (!state.currentTripId || !state.trips[state.currentTripId]) {
+        state.currentTripId = ids[0];
+        saveTripsState(state);
+      }
+      return state;
+    }
+
+    function renderTripSelect(state = ensureTripsState()) {
+      if (!tripSelect) return;
+      tripSelect.innerHTML = "";
+      Object.values(state.trips)
+        .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
+        .forEach((trip) => {
+          const option = document.createElement("option");
+          option.value = trip.id;
+          option.textContent = trip.name || "未命名行程表";
+          option.selected = trip.id === currentTripId;
+          tripSelect.appendChild(option);
+        });
+    }
+
+    function saveCurrentTrip({ silent = true } = {}) {
+      try {
+        const state = ensureTripsState();
+        const trip = state.trips[currentTripId] || {
+          id: currentTripId,
+          name: defaultTripName(),
+          updatedAt: new Date().toISOString(),
+          data: collectData(),
+        };
+        trip.name = tripNameInput?.value.trim() || trip.name || defaultTripName();
+        trip.updatedAt = new Date().toISOString();
+        trip.data = collectData();
+        state.trips[currentTripId] = trip;
+        state.currentTripId = currentTripId;
+        saveTripsState(state);
+        renderTripSelect(state);
+        if (!silent) showToast("已儲存行程表");
+      } catch (error) {
+        showToast("截圖太多或太大，請刪除部分圖片後再試");
+      }
+    }
+
+    function saveData() {
+      saveCurrentTrip();
+    }
+
+    function scheduleSave() {
+      window.clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(saveData, 220);
+    }
+
+    function restoreData() {
+      const state = ensureTripsState();
+      currentTripId = state.currentTripId;
+      const trip = state.trips[currentTripId];
+      if (trip?.data) applyData(trip.data);
+      if (tripNameInput) tripNameInput.value = trip?.name || defaultTripName();
+      renderTripSelect(state);
+    }
+
+    function switchTrip(id) {
+      const state = ensureTripsState();
+      if (!state.trips[id] || id === currentTripId) return;
+      saveCurrentTrip();
+      const nextState = ensureTripsState();
+      currentTripId = id;
+      nextState.currentTripId = id;
+      saveTripsState(nextState);
+      const trip = nextState.trips[id];
+      applyData(trip.data);
+      if (tripNameInput) tripNameInput.value = trip.name || defaultTripName();
+      prepareEditableFields();
+      ensureAttachmentNote();
+      renderTripSelect(nextState);
+      showToast("已切換行程表");
+    }
+
+    function createNewTrip() {
+      saveCurrentTrip();
+      const name = window.prompt("新行程表名稱", `${tripNameInput?.value.trim() || defaultTripName()} 複本`);
+      if (!name) return;
+      const state = ensureTripsState();
+      const id = `trip-${Date.now()}`;
+      currentTripId = id;
+      if (tripNameInput) tripNameInput.value = name.trim();
+      state.currentTripId = id;
+      state.trips[id] = {
+        id,
+        name: name.trim(),
+        updatedAt: new Date().toISOString(),
+        data: collectData(),
+      };
+      saveTripsState(state);
+      renderTripSelect(state);
+      showToast("已建立新行程表");
+    }
+
+    function deleteCurrentTrip() {
+      const state = ensureTripsState();
+      const ids = Object.keys(state.trips);
+      if (ids.length <= 1) {
+        showToast("至少保留一個行程表");
+        return;
+      }
+      const tripName = state.trips[currentTripId]?.name || "目前行程表";
+      if (!window.confirm(`刪除「${tripName}」？`)) return;
+      delete state.trips[currentTripId];
+      currentTripId = Object.keys(state.trips)[0];
+      state.currentTripId = currentTripId;
+      saveTripsState(state);
+      const nextTrip = state.trips[currentTripId];
+      applyData(nextTrip.data);
+      if (tripNameInput) tripNameInput.value = nextTrip.name || defaultTripName();
+      prepareEditableFields();
+      ensureAttachmentNote();
+      renderTripSelect(state);
+      showToast("已刪除行程表");
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function ensureAttachmentNote() {
+      const hasAttachment = attachmentGrid.querySelector(".attachment-card");
+      const note = attachmentGrid.querySelector(".empty-note");
+      if (hasAttachment && note) note.remove();
+      if (!hasAttachment && !note) {
+        attachmentGrid.innerHTML = '<p class="empty-note">未加入截圖。按「加入截圖」可放入訂房、門票、租車或餐廳確認資料。</p>';
+      }
+    }
+
+    function addItem(dayCard) {
+      const template = document.querySelector("#item-template");
+      const node = template.content.firstElementChild.cloneNode(true);
+      prepareEditableFields(node);
+      dayCard.querySelector(".timeline").appendChild(node);
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstField = node.querySelector("[contenteditable='true']");
+      clearPlaceholder(firstField);
+      firstField.focus();
+      scheduleSave();
+    }
+
+    function fillItem(node, item) {
+      node.querySelector(".item-time").textContent = item.time || "時間";
+      node.querySelector(".item-time").dataset.placeholderActive = item.time ? "false" : "true";
+      node.querySelector(".item-body h4").textContent = item.title || "新增景點 / 餐廳 / 車程";
+      const note = node.querySelector(".item-body > p");
+      note.textContent = item.note || "填寫地址、停留時間、訂位資料或備註。";
+      note.dataset.noteColor = item.color || "important";
+      const chip = node.querySelector(".chip");
+      chip.textContent = item.chip || "備註";
+      chip.className = `chip${item.color === "food" ? " food" : item.color === "transport" ? " drive" : item.color === "hotel" ? " hotel" : ""}`;
+      prepareEditableFields(node);
+    }
+
+    function createItem(item) {
+      const template = document.querySelector("#item-template");
+      const node = template.content.firstElementChild.cloneNode(true);
+      fillItem(node, item);
+      return node;
+    }
+
+    function addDay() {
+      const template = document.querySelector("#day-template");
+      const node = template.content.firstElementChild.cloneNode(true);
+      const dateNode = node.querySelector(".day-date");
+      dateNode.dataset.dateIso = nextDateIso();
+      prepareEditableFields(node);
+      days.appendChild(node);
+      addItem(node);
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
+      scheduleSave();
+    }
+
+    function createDay(day) {
+      const template = document.querySelector("#day-template");
+      const node = template.content.firstElementChild.cloneNode(true);
+      node.querySelector(".day-date").dataset.dateIso = day.iso;
+      node.querySelector(".day-title h3").textContent = day.title || "新行程";
+      const dayNote = node.querySelector(".day-note");
+      dayNote.textContent = day.note || "住宿 / 航班 / 備註";
+      dayNote.dataset.noteColor = day.noteColor || "important";
+      prepareEditableFields(node);
+      const timeline = node.querySelector(".timeline");
+      timeline.innerHTML = "";
+      (day.items.length ? day.items : [{ title: day.title, note: day.note, color: day.noteColor }]).forEach((item) => {
+        timeline.appendChild(createItem(item));
+      });
+      return node;
+    }
+
+    function addMemo() {
+      const template = document.querySelector("#memo-template");
+      const node = template.content.firstElementChild.cloneNode(true);
+      prepareEditableFields(node);
+      memoList.appendChild(node);
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstField = node.querySelector("[contenteditable='true']");
+      clearPlaceholder(firstField);
+      firstField.focus();
+      scheduleSave();
+    }
+
+    function resizeImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = new Image();
+          image.onload = () => {
+            const maxSide = 1400;
+            const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.82));
+          };
+          image.onerror = reject;
+          image.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addScreenshots(files) {
+      const images = [...files].filter((file) => file.type.startsWith("image/"));
+      if (!images.length) return;
+      showToast("正在加入截圖");
+      for (const file of images) {
+        try {
+          const template = document.querySelector("#attachment-template");
+          const node = template.content.firstElementChild.cloneNode(true);
+          const src = await resizeImage(file);
+          node.querySelector("img").src = src;
+          node.querySelector("img").alt = file.name || "行程附件截圖";
+          const category = node.querySelector(".attachment-category");
+          category.textContent = pendingScreenshotCategory;
+          category.dataset.category = pendingScreenshotCategory;
+          node.querySelector("[contenteditable='true']").textContent = file.name || "截圖備註";
+          prepareEditableFields(node);
+          ensureAttachmentNote();
+          attachmentGrid.appendChild(node);
+        } catch (error) {
+          showToast("有一張截圖未能加入");
+        }
+      }
+      ensureAttachmentNote();
+      saveData();
+    }
+
+    function inferPlanColor(text) {
+      if (/酒店|住宿|check.?in|旅館|hotel/i.test(text)) return "hotel";
+      if (/餐|食|壽司|拉麵|咖喱|海鮮|居酒屋|午餐|晚餐|早餐|訂位/i.test(text)) return "food";
+      if (/車|自駕|機場|航班|JR|交通|取車|還車|出發|抵達|路線/i.test(text)) return "transport";
+      return "important";
+    }
+
+    function colorLabel(color) {
+      return color === "hotel" ? "住宿" : color === "food" ? "美食 / 訂位" : color === "transport" ? "航班 / 交通" : "重要提醒";
+    }
+
+    function extractTime(text) {
+      const match = text.match(/(?:^|\s)(\d{1,2}[:：]\d{2}|早上|上午|中午|下午|晚上|傍晚)(?:\s|$|：|:)/);
+      return match ? match[1].replace("：", ":") : "";
+    }
+
+    function splitPlanItems(text) {
+      return text
+        .split(/[；;。\n]+/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+
+    function parsePlanText(text) {
+      const normalized = text.replace(/\r/g, "\n");
+      const datePattern = /((?:20\d{2}[\/.\-年])?\d{1,2}[\/.\-月]\d{1,2}(?:日)?)/g;
+      const matches = [...normalized.matchAll(datePattern)];
+      if (!matches.length) return [];
+      return matches.map((match, index) => {
+        const parsed = parseTripDate(match[1]);
+        if (!parsed) return null;
+        const start = match.index + match[0].length;
+        const end = matches[index + 1]?.index ?? normalized.length;
+        const body = normalized.slice(start, end).replace(/^[:：\s]+/, "").trim();
+        const iso = toDateIso(parsed.year, parsed.month, parsed.day);
+        const parts = splitPlanItems(body);
+        const title = parts[0]?.replace(/^\d{1,2}[:：]\d{2}\s*/, "") || `${parsed.month}/${parsed.day} 行程`;
+        const hotel = parts.find((part) => /酒店|住宿|hotel/i.test(part));
+        const items = parts.map((part) => {
+          const color = inferPlanColor(part);
+          return {
+            time: extractTime(part),
+            title: part.replace(/^(早上|上午|中午|下午|晚上|傍晚|\d{1,2}[:：]\d{2})[:：\s]*/, "").slice(0, 36),
+            note: part,
+            color,
+            chip: colorLabel(color),
+          };
+        });
+        return {
+          iso,
+          title,
+          note: hotel || "按匯入資料生成",
+          noteColor: hotel ? "hotel" : "important",
+          items,
+        };
+      }).filter(Boolean);
+    }
+
+    function replaceDaysWithPlan(parsedDays, successMessage) {
+      if (!parsedDays.length) {
+        showToast("請加入包含日期的行程文字");
+        return;
+      }
+      if (!window.confirm("生成行程會取代現有每日行程。是否繼續？")) return;
+      days.innerHTML = "";
+      parsedDays.forEach((day) => days.appendChild(createDay(day)));
+      prepareEditableFields(days);
+      saveData();
+      showToast(successMessage);
+      document.querySelector("#days-heading").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function generatePlanFromText() {
+      replaceDaysWithPlan(parsePlanText(planInput.value), "已生成每日行程");
+    }
+
+    function normalizeAiItem(item) {
+      const text = typeof item === "string" ? item : (item.note || item.description || item.title || "");
+      const color = typeof item === "object" && item.color ? item.color : inferPlanColor(text);
+      return {
+        time: typeof item === "object" ? (item.time || "") : extractTime(text),
+        title: typeof item === "object" ? (item.title || text).slice(0, 36) : text.replace(/^(早上|上午|中午|下午|晚上|傍晚|\d{1,2}[:：]\d{2})[:：\s]*/, "").slice(0, 36),
+        note: typeof item === "object" ? (item.note || item.description || text) : text,
+        color,
+        chip: typeof item === "object" ? (item.chip || colorLabel(color)) : colorLabel(color),
+      };
+    }
+
+    function normalizeAiDay(day) {
+      const parsed = parseIsoDate(day.iso) || parseTripDate(day.date || day.day || day.title || "");
+      if (!parsed) return null;
+      const sourceItems = Array.isArray(day.items) ? day.items : Array.isArray(day.schedule) ? day.schedule : [];
+      const items = sourceItems.map(normalizeAiItem).filter((item) => item.title || item.note);
+      const note = day.note || day.hotel || day.stay || "AI 生成行程";
+      const noteColor = day.noteColor || inferPlanColor(note);
+      return {
+        iso: toDateIso(parsed.year, parsed.month, parsed.day),
+        title: day.title || `${parsed.month}/${parsed.day} 行程`,
+        note,
+        noteColor,
+        items,
+      };
+    }
+
+    function normalizeAiPayload(payload) {
+      if (typeof payload === "string") return parsePlanText(payload);
+      const rawDays = Array.isArray(payload?.days) ? payload.days : Array.isArray(payload?.itinerary) ? payload.itinerary : null;
+      if (rawDays) return rawDays.map(normalizeAiDay).filter(Boolean);
+      if (typeof payload?.text === "string") return parsePlanText(payload.text);
+      if (typeof payload?.content === "string") return parsePlanText(payload.content);
+      return [];
+    }
+
+    async function generatePlanWithAI() {
+      const endpoint = aiEndpointInput?.value.trim();
+      const prompt = planInput.value.trim();
+      if (!endpoint) {
+        showToast("請先填寫 AI API 端點");
+        return;
+      }
+      if (!prompt) {
+        showToast("請先輸入行程要求");
+        return;
+      }
+      try {
+        showToast("AI 正在生成行程");
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            format: "days: [{ iso, title, note, noteColor, items: [{ time, title, note, color, chip }] }]",
+          }),
+        });
+        if (!response.ok) throw new Error("AI endpoint failed");
+        const contentType = response.headers.get("content-type") || "";
+        const payload = contentType.includes("application/json") ? await response.json() : await response.text();
+        const parsedDays = normalizeAiPayload(payload);
+        if (!parsedDays.length) throw new Error("AI response format not supported");
+        replaceDaysWithPlan(parsedDays, "AI 已生成每日行程");
+      } catch (error) {
+        showToast("AI 端點未連接或回傳格式不正確");
+      }
+    }
+
+    function loadPlanFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        planInput.value = String(reader.result || "");
+        showToast("已載入行程文字");
+      };
+      reader.readAsText(file);
+    }
+
+    function openImage(image) {
+      if (!image?.src) return;
+      const lightboxImage = lightbox.querySelector("img");
+      lightboxImage.src = image.src;
+      lightboxImage.alt = image.alt || "截圖預覽";
+      lightbox.classList.add("show");
+      lightbox.setAttribute("aria-hidden", "false");
+    }
+
+    function closeImage() {
+      const lightboxImage = lightbox.querySelector("img");
+      lightbox.classList.remove("show");
+      lightbox.setAttribute("aria-hidden", "true");
+      lightboxImage.removeAttribute("src");
+    }
+
+    function resetData() {
+      const confirmed = window.confirm("重置會清除所有已儲存行程表、清單和截圖。是否繼續？");
+      if (!confirmed) return;
+      window.localStorage.removeItem(storageKey);
+      window.localStorage.removeItem(tripsStorageKey);
+      window.location.reload();
+    }
+
+    function printPdf() {
+      saveData();
+      showToast("正在開啟 PDF 版面");
+      window.setTimeout(() => window.print(), 180);
+    }
+
+    app.addEventListener("focusin", (event) => {
+      const field = event.target.closest("[contenteditable='true']");
+      if (!field) return;
+      clearPlaceholder(field);
+    });
+
+    app.addEventListener("focusout", (event) => {
+      const field = event.target.closest("[contenteditable='true']");
+      if (!field) return;
+      syncPlaceholder(field);
+      scheduleSave();
+    });
+
+    app.addEventListener("blur", (event) => {
+      const field = event.target;
+      if (!field.matches?.("[contenteditable='true']")) return;
+      syncPlaceholder(field);
+      scheduleSave();
+    }, true);
+
+    app.addEventListener("keydown", (event) => {
+      const dayDate = event.target.closest(".day-date");
+      if (!dayDate || !["Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      openDatePicker(dayDate);
+    });
+
+    app.addEventListener("input", (event) => {
+      const field = event.target.closest("[contenteditable='true']");
+      if (!field) return;
+      field.classList.remove("editable-placeholder");
+      field.dataset.placeholderActive = "false";
+      scheduleSave();
+    });
+
+    app.addEventListener("click", (event) => {
+      const dayDate = event.target.closest(".day-date");
+      if (dayDate && !event.target.closest(".date-picker")) {
+        openDatePicker(dayDate);
+      }
+
+      const editableField = event.target.closest("[contenteditable='true']");
+      if (editableField) clearPlaceholder(editableField);
+
+      const actionButton = event.target.closest("[data-action]");
+      if (!actionButton) return;
+      const action = actionButton.dataset.action;
+      if (action === "open-image") openImage(actionButton);
+      if (action === "close-image") closeImage();
+      if (action === "print") printPdf();
+      if (action === "reset") resetData();
+      if (action === "save-trip") saveCurrentTrip({ silent: false });
+      if (action === "new-trip") createNewTrip();
+      if (action === "delete-trip") deleteCurrentTrip();
+      if (action === "add-day") addDay();
+      if (action === "add-item") addItem(actionButton.closest(".day-card"));
+      if (action === "delete-day") {
+        const dayCard = actionButton.closest(".day-card");
+        if (document.querySelectorAll(".day-card").length <= 1) {
+          showToast("至少保留一天行程");
+          return;
+        }
+        if (window.confirm("刪除這一天行程？")) {
+          dayCard.remove();
+          scheduleSave();
+        }
+      }
+      if (action === "add-memo") addMemo();
+      if (action === "upload-screenshot") {
+        pendingScreenshotCategory = actionButton.dataset.category || "酒店";
+        screenshotInput.click();
+      }
+      if (action === "upload-plan") planFileInput.click();
+      if (action === "generate-plan") generatePlanFromText();
+      if (action === "generate-ai-plan") generatePlanWithAI();
+      if (action === "note-color") {
+        const noteContainer = actionButton.closest(".item") || actionButton.closest(".day-card");
+        setNoteColor(noteContainer, actionButton.dataset.noteColor);
+        scheduleSave();
+      }
+      if (action === "delete-item") {
+        actionButton.closest(".item").remove();
+        scheduleSave();
+      }
+      if (action === "delete-memo") {
+        actionButton.closest("li").remove();
+        scheduleSave();
+      }
+      if (action === "delete-attachment") {
+        actionButton.closest(".attachment-card").remove();
+        ensureAttachmentNote();
+        scheduleSave();
+      }
+      if (action === "delete-flight-screenshot") {
+        flightScreenshotPanel.hidden = true;
+        scheduleSave();
+      }
+    });
+
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) closeImage();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && lightbox.classList.contains("show")) closeImage();
+    });
+
+    app.addEventListener("change", (event) => {
+      if (event.target === tripSelect) {
+        switchTrip(tripSelect.value);
+        return;
+      }
+      const picker = event.target.closest(".date-picker");
+      if (!picker || !picker.value) return;
+      const dayDate = picker.closest(".day-date");
+      renderDateField(dayDate, picker.value);
+      scheduleSave();
+    });
+
+    tripNameInput?.addEventListener("input", scheduleSave);
+
+    screenshotInput.addEventListener("change", (event) => {
+      addScreenshots(event.target.files);
+      event.target.value = "";
+    });
+
+    planFileInput.addEventListener("change", (event) => {
+      loadPlanFile(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    window.addEventListener("beforeprint", saveData);
+    restoreData();
+    prepareEditableFields();
+    ensureAttachmentNote();
+  </script>
+</body>
+</html>
