@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>北海道自駕行程表 PDF 製作器</title>
+  <title>行程表 PDF 製作器</title>
   <style>
     :root {
       color-scheme: light;
@@ -211,7 +211,7 @@
       min-height: 420px;
       background:
         linear-gradient(90deg, rgba(8, 29, 32, .86), rgba(8, 29, 32, .52) 56%, rgba(8, 29, 32, .18)),
-        url("assets/hokkaido-hero.jpeg") center 42% / cover no-repeat;
+        url("assets/travel-hero.jpeg") center 42% / cover no-repeat;
       color: #fff;
     }
 
@@ -1500,14 +1500,14 @@
   <div class="app" id="app">
     <header class="topbar">
       <div class="brand">
-        <strong contenteditable="true" data-save="trip-title">北海道自駕行程表</strong>
-        <span contenteditable="true" data-save="trip-subtitle">2026年6月29日 - 7月4日 | 札幌・小樽・富良野・積丹</span>
+        <strong contenteditable="true" data-save="trip-title" data-placeholder="我的行程表">我的行程表</strong>
+        <span contenteditable="true" data-save="trip-subtitle" data-placeholder="日期 / 地點 / 主題">日期 / 地點 / 主題</span>
         <span class="privacy-pill">私人本機儲存</span>
       </div>
       <div class="top-actions">
         <div class="trip-manager">
           <select class="trip-select" id="trip-select" aria-label="選擇行程表"></select>
-          <input class="trip-name-input" id="trip-name-input" type="text" value="北海道自駕行程表" aria-label="行程表名稱">
+          <input class="trip-name-input" id="trip-name-input" type="text" value="我的行程表" aria-label="行程表名稱">
           <button class="command-btn secondary" type="button" data-action="save-trip" title="儲存到此裝置" aria-label="儲存到此裝置">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
             本機儲存
@@ -1539,16 +1539,16 @@
 
     <section class="hero">
       <div class="hero-copy">
-        <div class="eyebrow" contenteditable="true" data-save="hero-eyebrow">HKG ⇄ CTS</div>
-        <h1 contenteditable="true" data-save="hero-title">北海道夏日自駕</h1>
-        <p contenteditable="true" data-save="hero-copy">以札幌作基地，串起小樽運河、ES CON Field、富良野花田、美瑛青池與積丹海岸；行程節奏預留購物、餐廳和車程緩衝。</p>
+        <div class="eyebrow" contenteditable="true" data-save="hero-eyebrow" data-placeholder="TRIP PLAN">TRIP PLAN</div>
+        <h1 contenteditable="true" data-save="hero-title" data-placeholder="我的旅程">我的旅程</h1>
+        <p contenteditable="true" data-save="hero-copy" data-placeholder="填寫旅程目的地、日期、重點和同行備註。">填寫旅程目的地、日期、重點和同行備註。</p>
       </div>
       <aside class="hero-panel">
         <div class="stat-grid">
-          <div class="stat"><b contenteditable="true" data-save="stat-days">6日5夜</b><span>旅程長度</span></div>
-          <div class="stat"><b contenteditable="true" data-save="stat-drive">約720km</b><span>預估自駕</span></div>
-          <div class="stat"><b contenteditable="true" data-save="stat-hotels">2間酒店</b><span>住宿安排</span></div>
-          <div class="stat"><b contenteditable="true" data-save="stat-theme">花田・海岸</b><span>行程重點</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-days" data-placeholder="未設定">未設定</b><span>旅程長度</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-drive" data-placeholder="未設定">未設定</b><span>預估車程</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-hotels" data-placeholder="未設定">未設定</b><span>住宿安排</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat-theme" data-placeholder="未設定">未設定</b><span>行程重點</span></div>
         </div>
       </aside>
     </section>
@@ -1573,31 +1573,31 @@
       <section aria-labelledby="overview-heading">
         <div class="section-title">
           <h2 id="overview-heading">旅程總覽</h2>
-          <p contenteditable="true" data-save="overview-note">航班時間以截圖為準；球賽、餐廳和泊車請出發前再核對。</p>
+          <p contenteditable="true" data-save="overview-note" data-placeholder="填寫總覽備註。">填寫總覽備註。</p>
         </div>
         <div class="overview-grid">
           <div class="flight-stack">
             <article class="flight-card">
-              <div class="flight-date">6/29<small>週一</small></div>
+              <div class="flight-date">去程<small>日期</small></div>
               <div class="flight-main">
-                <h3 contenteditable="true" data-save="flight-out-title">去程：香港 HKG → 新千歲 CTS</h3>
-                <div class="flight-line"><b contenteditable="true" data-save="flight-out-start">08:45</b><span contenteditable="true" data-save="flight-out-from">香港國際機場 T2</span></div>
-                <div class="flight-line"><b contenteditable="true" data-save="flight-out-end">14:55</b><span contenteditable="true" data-save="flight-out-to">新千歲機場・HX690 香港航空・約5小時10分</span></div>
+                <h3 contenteditable="true" data-save="flight-out-title" data-placeholder="去程航班 / 交通">去程航班 / 交通</h3>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-out-start" data-placeholder="時間">時間</b><span contenteditable="true" data-save="flight-out-from" data-placeholder="出發地點">出發地點</span></div>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-out-end" data-placeholder="時間">時間</b><span contenteditable="true" data-save="flight-out-to" data-placeholder="抵達地點 / 航班 / 交通備註">抵達地點 / 航班 / 交通備註</span></div>
                 <div class="chip-row">
-                  <span class="chip drive" contenteditable="true" data-save="flight-out-transfer">機場 → 札幌：約50分鐘</span>
-                  <span class="chip food" contenteditable="true" data-save="flight-out-food">晚餐：湯咖喱 / 迴轉壽司</span>
+                  <span class="chip drive" contenteditable="true" data-save="flight-out-transfer" data-placeholder="交通備註">交通備註</span>
+                  <span class="chip food" contenteditable="true" data-save="flight-out-food" data-placeholder="餐飲備註">餐飲備註</span>
                 </div>
               </div>
             </article>
             <article class="flight-card">
-              <div class="flight-date">7/4<small>週六</small></div>
+              <div class="flight-date">回程<small>日期</small></div>
               <div class="flight-main">
-                <h3 contenteditable="true" data-save="flight-back-title">回程：新千歲 CTS → 香港 HKG</h3>
-                <div class="flight-line"><b contenteditable="true" data-save="flight-back-start">15:55</b><span contenteditable="true" data-save="flight-back-from">新千歲機場</span></div>
-                <div class="flight-line"><b contenteditable="true" data-save="flight-back-end">20:45</b><span contenteditable="true" data-save="flight-back-to">香港國際機場 T1・HX691 香港航空・約5小時50分</span></div>
+                <h3 contenteditable="true" data-save="flight-back-title" data-placeholder="回程航班 / 交通">回程航班 / 交通</h3>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-back-start" data-placeholder="時間">時間</b><span contenteditable="true" data-save="flight-back-from" data-placeholder="出發地點">出發地點</span></div>
+                <div class="flight-line"><b contenteditable="true" data-save="flight-back-end" data-placeholder="時間">時間</b><span contenteditable="true" data-save="flight-back-to" data-placeholder="抵達地點 / 航班 / 交通備註">抵達地點 / 航班 / 交通備註</span></div>
                 <div class="chip-row">
-                  <span class="chip drive" contenteditable="true" data-save="flight-back-buffer">建議 12:45 前到機場</span>
-                  <span class="chip food" contenteditable="true" data-save="flight-back-food">午餐：機場拉麵道 / 札幌站</span>
+                  <span class="chip drive" contenteditable="true" data-save="flight-back-buffer" data-placeholder="機場 / 車程備註">機場 / 車程備註</span>
+                  <span class="chip food" contenteditable="true" data-save="flight-back-food" data-placeholder="餐飲備註">餐飲備註</span>
                 </div>
               </div>
             </article>
@@ -1605,10 +1605,10 @@
           <div class="panel">
             <h3>住宿與備註</h3>
             <ul class="hotel-list">
-              <li><span class="mini-icon">1</span><span contenteditable="true" data-save="hotel-1"><b>6/29、6/30、7/2、7/3：</b>Mitsui Garden Hotel Sapporo West（三井花園酒店札幌西）</span></li>
-              <li><span class="mini-icon">2</span><span contenteditable="true" data-save="hotel-2"><b>7/1：</b>NOZO Hotel Furano，方便翌日早上去富田農場與美瑛。</span></li>
-              <li><span class="mini-icon">P</span><span contenteditable="true" data-save="hotel-3"><b>自駕：</b>6/30 早上札幌取車，7/4 中午前還車或直接機場還車。</span></li>
-              <li><span class="mini-icon">¥</span><span contenteditable="true" data-save="hotel-4"><b>現金：</b>積丹、停車場和部分食店預留日圓現金。</span></li>
+              <li><span class="mini-icon">1</span><span contenteditable="true" data-save="hotel-1" data-placeholder="住宿 1">住宿 1</span></li>
+              <li><span class="mini-icon">2</span><span contenteditable="true" data-save="hotel-2" data-placeholder="住宿 2">住宿 2</span></li>
+              <li><span class="mini-icon">P</span><span contenteditable="true" data-save="hotel-3" data-placeholder="交通 / 租車備註">交通 / 租車備註</span></li>
+              <li><span class="mini-icon">¥</span><span contenteditable="true" data-save="hotel-4" data-placeholder="費用 / 現金備註">費用 / 現金備註</span></li>
             </ul>
           </div>
         </div>
@@ -1617,33 +1617,23 @@
       <section aria-labelledby="route-heading">
         <div class="section-title">
           <h2 id="route-heading">車程路線</h2>
-          <p contenteditable="true" data-save="route-note">時間為一般夏季路況估算，雨天或假日請加 20-40 分鐘。</p>
+          <p contenteditable="true" data-save="route-note" data-placeholder="填寫車程、交通或路線備註。">填寫車程、交通或路線備註。</p>
         </div>
         <div class="route-strip">
           <article class="route-card">
-            <time>6/29</time>
-            <h3 contenteditable="true" data-save="route-1-title">CTS → 札幌</h3>
-            <p contenteditable="true" data-save="route-1-body">約50分鐘。首日以入城、Check-in、狸小路和大通附近晚餐為主。</p>
+            <time contenteditable="true" data-save="route-1-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-1-title" data-placeholder="路線 1">路線 1</h3>
+            <p contenteditable="true" data-save="route-1-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
           </article>
           <article class="route-card">
-            <time>6/30</time>
-            <h3 contenteditable="true" data-save="route-2-title">札幌 → 小樽 → 北廣島</h3>
-            <p contenteditable="true" data-save="route-2-body">約45分鐘 + 約70分鐘。小樽午餐後前往 ES CON Field。</p>
+            <time contenteditable="true" data-save="route-2-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-2-title" data-placeholder="路線 2">路線 2</h3>
+            <p contenteditable="true" data-save="route-2-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
           </article>
           <article class="route-card">
-            <time>7/1</time>
-            <h3 contenteditable="true" data-save="route-3-title">札幌 → 富良野</h3>
-            <p contenteditable="true" data-save="route-3-body">約2小時15分鐘。下午先行花田與森林精靈露台。</p>
-          </article>
-          <article class="route-card">
-            <time>7/2</time>
-            <h3 contenteditable="true" data-save="route-4-title">富良野 → 美瑛 → 札幌</h3>
-            <p contenteditable="true" data-save="route-4-body">約3小時車程分段完成。清晨去富田農場，避開人潮。</p>
-          </article>
-          <article class="route-card">
-            <time>7/3</time>
-            <h3 contenteditable="true" data-save="route-5-title">札幌 → 積丹 → 小樽</h3>
-            <p contenteditable="true" data-save="route-5-body">約2小時20分鐘到神威岬；回程視體力加插小樽。</p>
+            <time contenteditable="true" data-save="route-3-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-3-title" data-placeholder="路線 3">路線 3</h3>
+            <p contenteditable="true" data-save="route-3-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
           </article>
         </div>
       </section>
@@ -1651,7 +1641,7 @@
       <section aria-labelledby="days-heading">
         <div class="section-title">
           <h2 id="days-heading">每日行程</h2>
-          <p contenteditable="true" data-save="days-note">餐廳可按訂位、球賽開場和天氣即日調整。</p>
+          <p contenteditable="true" data-save="days-note" data-placeholder="填寫每日行程備註。">填寫每日行程備註。</p>
         </div>
         <div class="color-legend" aria-label="顏色代表">
           <span class="legend-item"><span class="legend-swatch" data-note-color="hotel"></span>住宿</span>
@@ -1660,252 +1650,7 @@
           <span class="legend-item"><span class="legend-swatch" data-note-color="important"></span>重要提醒</span>
         </div>
         <div class="days" id="days">
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-1-date" data-date-field data-date-iso="2026-06-29" role="button" tabindex="0">6/29<small>週一</small><input class="date-picker" type="date" value="2026-06-29" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-1-title">抵達札幌・市內購物飲食</h3>
-                <p class="day-note" contenteditable="true" data-save="day-1-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d1-t1">14:55</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d1-h1">抵達新千歲機場</h4><p contenteditable="true" data-save="d1-p1">入境、取行李，購買飲品或簡單甜點；如首日不取車，可乘 JR 快速 Airport 入札幌。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d1-c1">CTS → 札幌：約37-50分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d1-t2">17:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d1-h2">酒店 Check-in・大通 / 狸小路</h4><p contenteditable="true" data-save="d1-p2">附近有札幌站商場、AOAO SAPPORO、狸小路藥妝與便利購物點。</p><div class="chip-row"><span class="chip hotel" contenteditable="true" data-save="d1-c2">三井花園酒店札幌西</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d1-t3">19:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d1-h3">晚餐：湯咖喱或迴轉壽司</h4><p contenteditable="true" data-save="d1-p3">建議 Suage+、GARAKU、根室花丸或 Toriton；晚飯後到大通公園散步。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d1-c3">札幌湯咖喱 / 迴轉壽司</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
-
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-2-date" data-date-field data-date-iso="2026-06-30" role="button" tabindex="0">6/30<small>週二</small><input class="date-picker" type="date" value="2026-06-30" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-2-title">小樽散策・ES CON Field 球賽</h3>
-                <p class="day-note" contenteditable="true" data-save="day-2-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d2-t1">09:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d2-h1">札幌取車・出發往小樽</h4><p contenteditable="true" data-save="d2-p1">建議先確認 ETC、雪胎不用但要檢查保險、導航語言和泊車方式。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d2-c1">札幌 → 小樽：約45分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d2-t2">10:15</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d2-h2">小樽運河・堺町通</h4><p contenteditable="true" data-save="d2-p2">北一硝子、音樂盒堂、LeTAO；午餐可選三角市場海鮮丼或若雞時代 Narutoa。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d2-c2">海鮮丼 / 若雞半身揚</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d2-t3">14:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d2-h3">前往 ES CON Field Hokkaido</h4><p contenteditable="true" data-save="d2-p3">F Village 可早到逛商店、餐飲和球場周邊；球賽時間以票面為準。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d2-c3">小樽 → 北廣島：約1小時10分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d2-t4">18:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d2-h4">觀看北海道日本火腿鬥士球賽</h4><p contenteditable="true" data-save="d2-p4">賽後回札幌約40-50分鐘；如泊車滿額，預留排隊離場時間。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d2-c4">球場餐飲 / 札幌宵夜拉麵</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
-
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-3-date" data-date-field data-date-iso="2026-07-01" role="button" tabindex="0">7/1<small>週三</small><input class="date-picker" type="date" value="2026-07-01" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-3-title">札幌出發・富良野花田</h3>
-                <p class="day-note" contenteditable="true" data-save="day-3-hotel" data-note-color="hotel">住宿：NOZO Hotel Furano</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d3-t1">08:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d3-h1">札幌 → 富良野</h4><p contenteditable="true" data-save="d3-p1">途中可在砂川 Highway Oasis 休息買零食；夏天美瑛一帶日落較遲，可放慢走。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d3-c1">約2小時15分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d3-t2">11:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d3-h2">午餐：富良野咖喱蛋包飯</h4><p contenteditable="true" data-save="d3-p2">建議 Kumagera、唯我獨尊或富良野起司工房附近簡餐；熱門店請預留等位。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d3-c2">咖喱 / 和牛丼 / 起司甜點</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d3-t3">13:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d3-h3">富田農場・薰衣草花田</h4><p contenteditable="true" data-save="d3-p3">7月初有早開薰衣草與彩色花田；試薰衣草雪糕，並避開正午最熱時段。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d3-c3">Farm Tomita</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d3-t4">16:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d3-h4">森林精靈露台・富良野市區</h4><p contenteditable="true" data-save="d3-p4">傍晚光線柔和；晚餐可在酒店附近或富良野市區處理。</p><div class="chip-row"><span class="chip hotel" contenteditable="true" data-save="d3-c4">NOZO Hotel Furano</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
-
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-4-date" data-date-field data-date-iso="2026-07-02" role="button" tabindex="0">7/2<small>週四</small><input class="date-picker" type="date" value="2026-07-02" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-4-title">美瑛青池・四季彩之丘・返回札幌</h3>
-                <p class="day-note" contenteditable="true" data-save="day-4-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d4-t1">08:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d4-h1">再訪富田農場或直上美瑛</h4><p contenteditable="true" data-save="d4-p1">想拍少人花田可早起；否則直接去青池，停車和步道較順。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d4-c1">富良野 → 青池：約55分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d4-t2">10:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d4-h2">美瑛青池・白鬚瀑布</h4><p contenteditable="true" data-save="d4-p2">青池顏色視天氣和光線而變；白鬚瀑布可順路停留約20分鐘。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d4-c2">Blue Pond / Shirahige Falls</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d4-t3">12:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d4-h3">四季彩之丘・午餐</h4><p contenteditable="true" data-save="d4-p3">彩色花帶、羊駝牧場和農場餐廳；亦可到美瑛選咖啡店。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d4-c3">農場餐廳 / 美瑛咖啡</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d4-t4">15:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d4-h4">返回札幌</h4><p contenteditable="true" data-save="d4-p4">晚餐建議成吉思汗、螃蟹或拉麵；抵達後可補購藥妝。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d4-c4">美瑛 → 札幌：約2小時30分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
-
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-5-date" data-date-field data-date-iso="2026-07-03" role="button" tabindex="0">7/3<small>週五</small><input class="date-picker" type="date" value="2026-07-03" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-5-title">積丹半島・神威岬・小樽候補</h3>
-                <p class="day-note" contenteditable="true" data-save="day-5-hotel" data-note-color="hotel">住宿：Mitsui Garden Hotel Sapporo West</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d5-t1">08:00</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d5-h1">札幌 → 積丹神威岬</h4><p contenteditable="true" data-save="d5-p1">海岸路線彎多，雨霧或強風時要保守；神威岬步道單程約20-30分鐘。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d5-c1">約2小時20分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d5-t2">11:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d5-h2">午餐：積丹海膽丼</h4><p contenteditable="true" data-save="d5-p2">6-8月是積丹海膽季；熱門店如中村屋、みさき需早到或排隊。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d5-c2">海膽丼 / 海鮮定食</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d5-t3">14:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d5-h3">島武意海岸或余市 Nikka</h4><p contenteditable="true" data-save="d5-p3">天氣好選海岸景點；雨天可改余市蒸餾所或小樽咖啡甜點。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d5-c3">備案：小樽二訪</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d5-t4">18:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d5-h4">回札幌晚餐</h4><p contenteditable="true" data-save="d5-p4">建議提前預約成吉思汗 Daruma、螃蟹本家或薄野居酒屋。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d5-c4">成吉思汗 / 螃蟹 / 居酒屋</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
-
-          <article class="day-card">
-            <div class="day-head">
-              <div class="day-date" data-save="day-6-date" data-date-field data-date-iso="2026-07-04" role="button" tabindex="0">7/4<small>週六</small><input class="date-picker" type="date" value="2026-07-04" aria-label="選擇日期"></div>
-              <div class="day-title">
-                <h3 contenteditable="true" data-save="day-6-title">札幌最後購物・回程</h3>
-                <p class="day-note" contenteditable="true" data-save="day-6-hotel" data-note-color="transport">回程航班：CTS 15:55 → HKG 20:45</p>
-                <div class="color-row" data-color-row>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
-                  <button class="color-dot active" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
-                  <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
-                </div>
-              </div>
-              <div class="day-actions">
-                <button class="icon-btn" type="button" data-action="add-item" title="新增項目" aria-label="新增項目"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                <button class="icon-btn danger" type="button" data-action="delete-day" title="刪除整天" aria-label="刪除整天"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-            <div class="timeline">
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d6-t1">09:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d6-h1">札幌站 / 大丸 / ESTA 周邊購物</h4><p contenteditable="true" data-save="d6-p1">先處理退稅、手信和行李整理；避免最後一刻塞滿行李箱。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d6-c1">手信 / 藥妝 / 百貨</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d6-t2">11:30</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d6-h2">午餐・出發往新千歲</h4><p contenteditable="true" data-save="d6-p2">可在札幌吃拉麵，或直接到新千歲機場拉麵道和 Royce Chocolate World。</p><div class="chip-row"><span class="chip food" contenteditable="true" data-save="d6-c2">拉麵 / 機場甜點</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d6-t3">12:45</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d6-h3">到達機場・還車 / Check-in</h4><p contenteditable="true" data-save="d6-p3">若在市內還車，改乘 JR；若機場還車，預留接駁車時間。</p><div class="chip-row"><span class="chip drive" contenteditable="true" data-save="d6-c3">札幌 → CTS：約50分鐘</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-              <div class="item">
-                <div class="item-time" contenteditable="true" data-save="d6-t4">15:55</div>
-                <div class="item-body"><h4 contenteditable="true" data-save="d6-h4">HX691 起飛回香港</h4><p contenteditable="true" data-save="d6-p4">抵達香港國際機場 T1 時間 20:45。</p><div class="chip-row"><span class="chip" contenteditable="true" data-save="d6-c4">CTS → HKG：約5小時50分</span></div></div>
-                <button class="delete-item" type="button" data-action="delete-item" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-              </div>
-            </div>
-          </article>
+          <p class="empty-note">未加入每日行程。按「新日期」開始建立。</p>
         </div>
         <div class="add-day-panel">
           <button class="command-btn" type="button" data-action="add-day">
@@ -1918,7 +1663,7 @@
       <section aria-labelledby="memo-heading">
         <div class="section-title">
           <h2 id="memo-heading">出發清單與訂房門票</h2>
-          <p contenteditable="true" data-save="memo-note">把確認事項、訂房、門票、租車與航班截圖集中在這裡。</p>
+          <p contenteditable="true" data-save="memo-note" data-placeholder="把確認事項、訂房、門票、租車與截圖集中在這裡。">把確認事項、訂房、門票、租車與截圖集中在這裡。</p>
         </div>
         <div class="overview-grid">
           <div class="panel">
@@ -1930,17 +1675,13 @@
               </button>
             </div>
             <ul class="memo-list" id="memo-list">
-              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-1">ES CON Field 球票、泊車券或交通安排。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
-              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-2">租車公司、ETC、NOC 補償保險、國際車牌。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
-              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-3">積丹海膽店、札幌成吉思汗或螃蟹餐廳訂位。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
-              <li><span class="mini-icon">□</span><span contenteditable="true" data-save="memo-4">酒店泊車費、Check-in 時間和行李寄存安排。</span><button class="delete-memo" type="button" data-action="delete-memo" title="刪除" aria-label="刪除"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></li>
             </ul>
           </div>
           <div class="panel">
             <div class="panel-head">
               <h3>訂房 / 門票截圖</h3>
             </div>
-            <p contenteditable="true" data-save="screenshots-note">加入酒店、球票、租車、餐廳訂位等確認截圖。</p>
+            <p contenteditable="true" data-save="screenshots-note" data-placeholder="加入機票、酒店、租車、球票、餐廳等確認截圖。">加入機票、酒店、租車、球票、餐廳等確認截圖。</p>
             <div class="upload-category-grid">
               <button class="upload-category" type="button" data-action="upload-screenshot" data-category="機票">
                 <b><span class="category-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M10.5 4.5 21 12l-10.5 7.5v-6L3 16V8l7.5 2.5z"/></svg></span>機票</b>
@@ -1965,7 +1706,7 @@
             </div>
             <input id="screenshot-input" type="file" accept="image/*" multiple hidden>
             <div class="attachment-grid" id="attachment-grid">
-              <p class="empty-note">未加入截圖。按「加入截圖」可放入訂房、門票、租車或餐廳確認資料。</p>
+              <p class="empty-note">未加入截圖。按上方分類按鈕可放入確認資料。</p>
             </div>
           </div>
         </div>
@@ -1977,7 +1718,7 @@
           <p>貼上概括行程或上載文字檔，會按日期整理成每日行程。</p>
         </div>
         <div class="panel plan-import-grid">
-          <textarea class="plan-textarea" id="plan-input" placeholder="例：&#10;6月29日：札幌市內購物飲食，酒店住三井西花園酒店&#10;6月30日：早上取車自駕到小樽，下午到 ES CON 看球賽&#10;7月1日：富良野，富田農場，美瑛青池"></textarea>
+          <textarea class="plan-textarea" id="plan-input" placeholder="例：&#10;6月29日：下午抵達目的地，晚上市內晚餐。&#10;6月30日：早上出發到主要景點，下午購物或活動。"></textarea>
           <div class="plan-tools">
             <button class="command-btn" type="button" data-action="upload-plan">
               <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
@@ -2085,8 +1826,8 @@
     const tripNameInput = document.querySelector("#trip-name-input");
     const lightbox = document.querySelector("#lightbox");
     const toast = document.querySelector("#toast");
-    const storageKey = "hokkaido-itinerary-maker-v1";
-    const tripsStorageKey = "hokkaido-itinerary-maker-trips-v1";
+    const storageKey = "travel-itinerary-maker-v2";
+    const tripsStorageKey = "travel-itinerary-maker-trips-v2";
     let pendingScreenshotCategory = "酒店";
     let currentTripId = "default";
     let saveTimer;
@@ -2666,7 +2407,7 @@
       const note = attachmentGrid.querySelector(".empty-note");
       if (hasAttachment && note) note.remove();
       if (!hasAttachment && !note) {
-        attachmentGrid.innerHTML = '<p class="empty-note">未加入截圖。按「加入截圖」可放入訂房、門票、租車或餐廳確認資料。</p>';
+        attachmentGrid.innerHTML = '<p class="empty-note">未加入截圖。按上方分類按鈕可放入確認資料。</p>';
       }
     }
 
@@ -2705,6 +2446,7 @@
     function addDay() {
       const template = document.querySelector("#day-template");
       const node = template.content.firstElementChild.cloneNode(true);
+      days.querySelector(".empty-note")?.remove();
       const dateNode = node.querySelector(".day-date");
       dateNode.dataset.dateIso = nextDateIso();
       prepareEditableFields(node);
@@ -2970,6 +2712,8 @@
       if (!confirmed) return;
       window.localStorage.removeItem(storageKey);
       window.localStorage.removeItem(tripsStorageKey);
+      window.localStorage.removeItem("hokkaido-itinerary-maker-v1");
+      window.localStorage.removeItem("hokkaido-itinerary-maker-trips-v1");
       window.location.reload();
     }
 
