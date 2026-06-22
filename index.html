@@ -211,7 +211,7 @@
       min-height: 420px;
       background:
         linear-gradient(90deg, rgba(8, 29, 32, .86), rgba(8, 29, 32, .52) 56%, rgba(8, 29, 32, .18)),
-        url("assets/flight-public.jpeg") center 24% / cover no-repeat;
+        url("assets/hokkaido-hero.jpeg") center 42% / cover no-repeat;
       color: #fff;
     }
 
@@ -906,8 +906,7 @@
     }
 
     .delete-memo,
-    .delete-attachment,
-    .delete-flight-shot {
+    .delete-attachment {
       display: grid;
       width: 28px;
       height: 28px;
@@ -926,36 +925,10 @@
       box-shadow: 0 2px 8px rgba(24, 32, 38, .14);
     }
 
-    .delete-flight-shot {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 2;
-      background: rgba(255, 244, 242, .96);
-      color: var(--coral);
-      box-shadow: 0 2px 8px rgba(24, 32, 38, .14);
-    }
-
     .delete-memo .icon,
-    .delete-attachment .icon,
-    .delete-flight-shot .icon {
+    .delete-attachment .icon {
       width: 16px;
       height: 16px;
-    }
-
-    .photo-panel {
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      background: #fff;
-    }
-
-    .photo-panel img {
-      display: block;
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-      object-position: top center;
     }
 
     .zoomable-image {
@@ -1402,7 +1375,6 @@
       .delete-item,
       .delete-memo,
       .delete-attachment,
-      .delete-flight-shot,
       .color-row,
       .compact-btn,
       #screenshot-input,
@@ -1987,12 +1959,6 @@
             </div>
           </div>
         </div>
-        <div class="overview-grid">
-          <div class="panel photo-panel full-row" id="flight-screenshot-panel">
-            <button class="delete-flight-shot" type="button" data-action="delete-flight-screenshot" title="刪除航班截圖" aria-label="刪除航班截圖"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-            <img class="zoomable-image" src="assets/flight-public.jpeg" alt="已隱藏個人資料的航班資料示範圖" data-action="open-image">
-          </div>
-        </div>
       </section>
 
       <section class="plan-import" aria-labelledby="import-heading">
@@ -2105,7 +2071,6 @@
     const aiEndpointInput = document.querySelector("#ai-endpoint-input");
     const tripSelect = document.querySelector("#trip-select");
     const tripNameInput = document.querySelector("#trip-name-input");
-    const flightScreenshotPanel = document.querySelector("#flight-screenshot-panel");
     const lightbox = document.querySelector("#lightbox");
     const toast = document.querySelector("#toast");
     const storageKey = "hokkaido-itinerary-maker-v1";
@@ -2377,7 +2342,6 @@
       data.daysMarkup = days.innerHTML;
       data.memoMarkup = memoList.innerHTML;
       data.attachmentsMarkup = attachmentGrid.innerHTML;
-      data.flightScreenshotHidden = Boolean(flightScreenshotPanel?.hidden);
       return data;
     }
 
@@ -2385,7 +2349,6 @@
       if (data.daysMarkup) days.innerHTML = data.daysMarkup;
       if (data.memoMarkup) memoList.innerHTML = data.memoMarkup;
       if (data.attachmentsMarkup) attachmentGrid.innerHTML = data.attachmentsMarkup;
-      if (flightScreenshotPanel) flightScreenshotPanel.hidden = Boolean(data.flightScreenshotHidden);
       document.querySelectorAll("[data-save]").forEach((node) => {
         const key = node.dataset.save;
         if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -2982,10 +2945,6 @@
       if (action === "delete-attachment") {
         actionButton.closest(".attachment-card").remove();
         ensureAttachmentNote();
-        scheduleSave();
-      }
-      if (action === "delete-flight-screenshot") {
-        flightScreenshotPanel.hidden = true;
         scheduleSave();
       }
     });
