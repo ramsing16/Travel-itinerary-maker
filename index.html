@@ -2743,9 +2743,17 @@
       readonlyApp.querySelector("#toast")?.remove();
       readonlyApp.querySelector("#lightbox")?.remove();
       readonlyApp.querySelectorAll("template, .plan-import, .add-day-panel, .color-row, .item-color-row, .day-actions, .delete-item, .delete-memo, .delete-attachment, .upload-category-grid, input, select, textarea").forEach((node) => node.remove());
-      readonlyApp.querySelectorAll("button").forEach((button) => {
-        if (button.dataset.action !== "open-map") button.remove();
+      readonlyApp.querySelectorAll('[data-action="open-map"]').forEach((button) => {
+        const href = button.dataset.mapUrl || "";
+        const link = document.createElement("a");
+        link.className = button.className;
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = button.textContent;
+        button.replaceWith(link);
       });
+      readonlyApp.querySelectorAll("button").forEach((button) => button.remove());
       readonlyApp.querySelectorAll("[contenteditable]").forEach((node) => {
         node.removeAttribute("contenteditable");
         node.removeAttribute("tabindex");
@@ -2763,7 +2771,7 @@
         node.removeAttribute("data-date-field");
       });
       readonlyApp.querySelectorAll("[data-action]").forEach((node) => {
-        if (!["open-map", "open-image"].includes(node.dataset.action)) node.removeAttribute("data-action");
+        if (node.dataset.action !== "open-image") node.removeAttribute("data-action");
       });
       removeUnsafeAttributes(readonlyApp);
 
@@ -2847,13 +2855,6 @@
             lightboxImage.removeAttribute("src");
           }
           document.addEventListener("click", (event) => {
-            const mapButton = event.target.closest("[data-action='open-map']");
-            if (mapButton) {
-              event.preventDefault();
-              const url = mapButton.dataset.mapUrl;
-              if (url) window.open(url, "_blank", "noopener");
-              return;
-            }
             const image = event.target.closest("[data-action='open-image']");
             if (image?.tagName === "IMG") openImage(image);
             if (event.target === lightbox || event.target.closest("[data-action='close-image']")) closeImage();
