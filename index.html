@@ -1365,6 +1365,62 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
     }
 
+    .share-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(12, 18, 22, .72);
+    }
+
+    .share-dialog.show {
+      display: flex;
+    }
+
+    .share-dialog-panel {
+      width: min(560px, 100%);
+      padding: 16px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 22px 60px rgba(12, 18, 22, .28);
+    }
+
+    .share-dialog-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .share-dialog-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .share-url-box {
+      width: 100%;
+      min-height: 132px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+      resize: vertical;
+    }
+
+    .share-dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
     @media (max-width: 900px) {
       .hero {
         grid-template-columns: 1fr;
@@ -2099,6 +2155,17 @@
       <button class="lightbox-close" type="button" data-action="close-image" aria-label="關閉圖片"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <img alt="">
     </div>
+    <div class="share-dialog" id="share-dialog" aria-hidden="true">
+      <div class="share-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="share-dialog-title">
+        <h3 id="share-dialog-title">分享網址</h3>
+        <p>此連結包含目前行程文字、地點和地圖連結，不包含截圖。不要公開分享含私人資料的行程。</p>
+        <textarea class="share-url-box" id="share-url-box" readonly aria-label="分享網址"></textarea>
+        <div class="share-dialog-actions">
+          <button class="command-btn secondary" type="button" data-action="copy-share-dialog">複製</button>
+          <button class="command-btn primary" type="button" data-action="close-share-dialog">完成</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <template id="item-template">
@@ -2190,6 +2257,8 @@
     const tripSelect = document.querySelector("#trip-select");
     const tripNameInput = document.querySelector("#trip-name-input");
     const lightbox = document.querySelector("#lightbox");
+    const shareDialog = document.querySelector("#share-dialog");
+    const shareUrlBox = document.querySelector("#share-url-box");
     const toast = document.querySelector("#toast");
     const storageKey = "travel-itinerary-maker-v2";
     const tripsStorageKey = "travel-itinerary-maker-trips-v2";
@@ -2870,9 +2939,21 @@
 
     function collectShareLinkData() {
       const data = collectData();
+      data.daysMarkup = compactShareMarkup(data.daysMarkup);
       data.attachmentsMarkup = '<p class="empty-note">分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。</p>';
       data["screenshots-note"] = "分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。";
       return data;
+    }
+
+    function compactShareMarkup(html) {
+      const template = document.createElement("template");
+      template.innerHTML = String(html || "");
+      template.content.querySelectorAll(".map-link-row").forEach((node) => node.remove());
+      template.content.querySelectorAll(".map-url").forEach((node) => {
+        node.textContent = "";
+        node.removeAttribute("data-save");
+      });
+      return template.innerHTML;
     }
 
     async function buildShareUrl() {
@@ -2895,22 +2976,48 @@
       }
       const encoded = compressed ? `gz.${compressed}` : `b64.${base64UrlEncodeText(json)}`;
       const url = new URL(shareUrlBase());
-      url.searchParams.set("share", encoded);
+      url.hash = `share=${encoded}`;
       return url.toString();
+    }
+
+    function openShareDialog(url) {
+      if (!shareDialog || !shareUrlBox) return;
+      shareUrlBox.value = url;
+      shareDialog.classList.add("show");
+      shareDialog.setAttribute("aria-hidden", "false");
+      shareUrlBox.focus();
+      shareUrlBox.select();
+    }
+
+    function closeShareDialog() {
+      if (!shareDialog || !shareUrlBox) return;
+      shareDialog.classList.remove("show");
+      shareDialog.setAttribute("aria-hidden", "true");
+      shareUrlBox.value = "";
+    }
+
+    async function copyTextWithFallback(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      if (shareUrlBox) {
+        shareUrlBox.focus();
+        shareUrlBox.select();
+      }
+      return document.execCommand?.("copy") || false;
     }
 
     async function copyShareUrl() {
       try {
         const url = await buildShareUrl();
-        if (url.length > 60000) {
-          showToast("分享網址太長，請改用「分享」HTML 檔");
-          return;
-        }
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(url);
-          showToast("已複製分享網址（不含截圖）");
-        } else {
-          window.prompt("請複製分享網址", url);
+        openShareDialog(url);
+        if (url.length > 30000) showToast("分享網址較長，部分通訊軟件可能不支援");
+        try {
+          const copied = await copyTextWithFallback(url);
+          showToast(copied ? "已複製分享網址（不含截圖）" : "請手動複製分享網址");
+        } catch (error) {
+          showToast("請手動複製分享網址");
         }
       } catch (error) {
         showToast("未能建立分享網址");
@@ -2918,7 +3025,8 @@
     }
 
     async function parseSharedUrlPayload() {
-      const value = new URLSearchParams(window.location.search).get("share");
+      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+      const value = new URLSearchParams(window.location.search).get("share") || new URLSearchParams(hash).get("share");
       if (!value) return null;
       const separator = value.indexOf(".");
       if (separator < 0) return null;
@@ -3903,6 +4011,16 @@
       }
       if (action === "open-image") openImage(actionButton);
       if (action === "close-image") closeImage();
+      if (action === "close-share-dialog") {
+        closeShareDialog();
+        return;
+      }
+      if (action === "copy-share-dialog") {
+        copyTextWithFallback(shareUrlBox?.value || "")
+          .then((copied) => showToast(copied ? "已複製分享網址" : "請手動複製分享網址"))
+          .catch(() => showToast("請手動複製分享網址"));
+        return;
+      }
       if (action === "toggle-toolbar") {
         setToolbarOpen(!topbar?.classList.contains("toolbar-open"));
         return;
@@ -3961,8 +4079,13 @@
       if (event.target === lightbox) closeImage();
     });
 
+    shareDialog?.addEventListener("click", (event) => {
+      if (event.target === shareDialog) closeShareDialog();
+    });
+
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && lightbox.classList.contains("show")) closeImage();
+      if (event.key === "Escape" && shareDialog?.classList.contains("show")) closeShareDialog();
     });
 
     app.addEventListener("change", (event) => {
