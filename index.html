@@ -2912,6 +2912,11 @@
 
       const styleText = document.querySelector("style")?.textContent || "";
       const shareStyle = `
+        :root {
+          --share-mobile-top-gap: 0px;
+          --share-sticky-day-offset: 0px;
+          --share-mobile-bottom-gap: 0px;
+        }
         body { background: #f4f7f8; }
         .share-readonly { padding-bottom: 0; }
         .share-readonly .topbar {
@@ -2971,8 +2976,14 @@
           font-weight: 750;
         }
         @media (max-width: 640px) {
+          :root {
+            --share-mobile-top-gap: 116px;
+            --share-sticky-day-offset: 164px;
+            --share-mobile-bottom-gap: 104px;
+          }
           body {
             padding-top: var(--share-mobile-top-gap, 0px);
+            padding-bottom: var(--share-mobile-bottom-gap, 0px);
           }
           .share-banner {
             display: none;
@@ -3009,9 +3020,10 @@
           function updateShareStickyOffset() {
             const topbar = document.querySelector(".share-readonly .topbar");
             const isMobile = window.matchMedia("(max-width: 640px)").matches;
-            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-            const topGap = isMobile && isIos ? 68 : 0;
+            const topGap = isMobile ? 116 : 0;
+            const bottomGap = isMobile ? 104 : 0;
             document.documentElement.style.setProperty("--share-mobile-top-gap", topGap + "px");
+            document.documentElement.style.setProperty("--share-mobile-bottom-gap", bottomGap + "px");
             const offset = isMobile && topbar ? topGap + Math.ceil(topbar.getBoundingClientRect().height) + 8 : 0;
             document.documentElement.style.setProperty("--share-sticky-day-offset", offset + "px");
           }
