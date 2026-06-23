@@ -2421,7 +2421,7 @@
         return;
       }
       const opened = window.open(url, "_blank", "noopener");
-      if (!opened) window.location.href = url;
+      if (!opened) showToast("請允許彈出視窗以開啟 Google Maps");
     }
 
     function prepareEditableFields(scope = document) {
