@@ -26,6 +26,7 @@
     }
 
     html {
+      --sticky-day-offset: 0px;
       scroll-behavior: smooth;
     }
 
@@ -1489,7 +1490,7 @@
 
       .day-head {
         position: sticky;
-        top: 86px;
+        top: var(--sticky-day-offset, 86px);
         z-index: 12;
         grid-template-columns: 68px 1fr;
         border-radius: 8px 8px 0 0;
@@ -2092,6 +2093,13 @@
     let pendingScreenshotCategory = "酒店";
     let currentTripId = "default";
     let saveTimer;
+
+    function updateStickyDayOffset() {
+      const topbar = document.querySelector(".topbar");
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+      const height = isMobile && topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 0;
+      document.documentElement.style.setProperty("--sticky-day-offset", `${height}px`);
+    }
 
     function getTripYear() {
       const titleText = document.querySelector("[data-save='trip-subtitle']")?.textContent || "";
@@ -3133,6 +3141,7 @@
       prepareEditableFields();
       ensureAttachmentNote();
       renderTripSelect(state);
+      updateStickyDayOffset();
     }
 
     function importBackupFile(file) {
@@ -3166,6 +3175,7 @@
       if (trip?.data) applyData(trip.data);
       if (tripNameInput) tripNameInput.value = trip?.name || defaultTripName();
       renderTripSelect(state);
+      updateStickyDayOffset();
     }
 
     function switchTrip(id) {
@@ -3182,6 +3192,7 @@
       prepareEditableFields();
       ensureAttachmentNote();
       renderTripSelect(nextState);
+      updateStickyDayOffset();
       showToast("已切換此裝置的行程表");
     }
 
@@ -3719,10 +3730,13 @@
       event.target.value = "";
     });
 
+    window.addEventListener("resize", updateStickyDayOffset);
+    window.addEventListener("orientationchange", () => window.setTimeout(updateStickyDayOffset, 250));
     window.addEventListener("beforeprint", saveData);
     restoreData();
     prepareEditableFields();
     ensureAttachmentNote();
+    updateStickyDayOffset();
   </script>
 </body>
 </html>
