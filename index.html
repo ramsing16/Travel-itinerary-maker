@@ -1432,7 +1432,7 @@
       .top-actions {
         grid-column: 1 / -1;
         display: none;
-        grid-template-columns: minmax(62px, 1fr) 40px 30px 30px 39px 39px 39px 30px 36px;
+        grid-template-columns: minmax(84px, 1.45fr) repeat(4, minmax(0, 1fr));
         gap: 3px;
         width: 100%;
         overflow-x: visible;
@@ -1888,6 +1888,10 @@
         <button class="command-btn secondary" type="button" data-action="export-share">
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
           分享
+        </button>
+        <button class="command-btn secondary" type="button" data-action="copy-share-link">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"/></svg>
+          連結
         </button>
         <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
@@ -2813,6 +2817,143 @@
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function bytesToBase64Url(bytes) {
+      let binary = "";
+      bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+      });
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function base64UrlToBytes(value) {
+      const base64 = String(value || "").replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(String(value || "").length / 4) * 4, "=");
+      const binary = atob(base64);
+      return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    }
+
+    function base64UrlEncodeText(text) {
+      return bytesToBase64Url(new TextEncoder().encode(text));
+    }
+
+    function base64UrlDecodeText(value) {
+      return new TextDecoder().decode(base64UrlToBytes(value));
+    }
+
+    async function gzipToBase64Url(text) {
+      if (!("CompressionStream" in window)) return "";
+      const stream = new CompressionStream("gzip");
+      const writer = stream.writable.getWriter();
+      await writer.write(new TextEncoder().encode(text));
+      await writer.close();
+      const buffer = await new Response(stream.readable).arrayBuffer();
+      return bytesToBase64Url(new Uint8Array(buffer));
+    }
+
+    async function gunzipFromBase64Url(value) {
+      if (!("DecompressionStream" in window)) throw new Error("Unsupported compression");
+      const stream = new DecompressionStream("gzip");
+      const writer = stream.writable.getWriter();
+      await writer.write(base64UrlToBytes(value));
+      await writer.close();
+      const buffer = await new Response(stream.readable).arrayBuffer();
+      return new TextDecoder().decode(buffer);
+    }
+
+    function shareUrlBase() {
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.hash = "";
+      return url.toString();
+    }
+
+    function collectShareLinkData() {
+      const data = collectData();
+      data.attachmentsMarkup = '<p class="empty-note">分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。</p>';
+      data["screenshots-note"] = "分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。";
+      return data;
+    }
+
+    async function buildShareUrl() {
+      saveData();
+      const payload = {
+        app: "travel-itinerary-maker",
+        type: "share-url",
+        version: 1,
+        name: defaultTripName(),
+        exportedAt: new Date().toISOString(),
+        note: "此分享連結不包含截圖。不要公開含私人行程資料的連結。",
+        data: collectShareLinkData(),
+      };
+      const json = JSON.stringify(payload);
+      let compressed = "";
+      try {
+        compressed = await gzipToBase64Url(json);
+      } catch (error) {
+        compressed = "";
+      }
+      const encoded = compressed ? `gz.${compressed}` : `b64.${base64UrlEncodeText(json)}`;
+      const url = new URL(shareUrlBase());
+      url.searchParams.set("share", encoded);
+      return url.toString();
+    }
+
+    async function copyShareUrl() {
+      try {
+        const url = await buildShareUrl();
+        if (url.length > 60000) {
+          showToast("分享網址太長，請改用「分享」HTML 檔");
+          return;
+        }
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+          showToast("已複製分享網址（不含截圖）");
+        } else {
+          window.prompt("請複製分享網址", url);
+        }
+      } catch (error) {
+        showToast("未能建立分享網址");
+      }
+    }
+
+    async function parseSharedUrlPayload() {
+      const value = new URLSearchParams(window.location.search).get("share");
+      if (!value) return null;
+      const separator = value.indexOf(".");
+      if (separator < 0) return null;
+      const mode = value.slice(0, separator);
+      const body = value.slice(separator + 1);
+      const json = mode === "gz" ? await gunzipFromBase64Url(body) : base64UrlDecodeText(body);
+      const payload = JSON.parse(json);
+      if (payload?.app !== "travel-itinerary-maker" || payload?.type !== "share-url" || !payload.data) return null;
+      return payload;
+    }
+
+    async function restoreSharedUrlData() {
+      const payload = await parseSharedUrlPayload();
+      if (!payload) return false;
+      const data = sanitizeBackupData(payload.data);
+      if (!Object.keys(data).length) return false;
+      applyData(data);
+      currentTripId = "shared-url";
+      if (tripNameInput) tripNameInput.value = payload.name || defaultTripName();
+      renderTripSelect({
+        currentTripId,
+        trips: {
+          [currentTripId]: {
+            id: currentTripId,
+            name: payload.name || "分享行程",
+            updatedAt: payload.exportedAt || new Date().toISOString(),
+            data,
+          },
+        },
+      });
+      prepareEditableFields();
+      ensureAttachmentNote();
+      updateStickyDayOffset();
+      showToast("已載入分享行程（不含截圖）");
+      return true;
     }
 
     function exportBackup() {
@@ -3772,6 +3913,7 @@
       if (action === "export-backup") exportBackup();
       if (action === "import-backup") backupInput.click();
       if (action === "export-share") exportShareHtml();
+      if (action === "copy-share-link") copyShareUrl();
       if (action === "new-trip") createNewTrip();
       if (action === "delete-trip") deleteCurrentTrip();
       if (action === "add-day") addDay();
@@ -3855,10 +3997,26 @@
     window.addEventListener("resize", syncToolbarForViewport);
     window.addEventListener("orientationchange", () => window.setTimeout(syncToolbarForViewport, 250));
     window.addEventListener("beforeprint", saveData);
-    restoreData();
-    prepareEditableFields();
-    ensureAttachmentNote();
-    syncToolbarForViewport();
+
+    async function initializeApp() {
+      try {
+        const restoredShare = await restoreSharedUrlData();
+        if (!restoredShare) {
+          restoreData();
+          prepareEditableFields();
+          ensureAttachmentNote();
+          syncToolbarForViewport();
+        }
+      } catch (error) {
+        showToast("分享網址格式不正確");
+        restoreData();
+        prepareEditableFields();
+        ensureAttachmentNote();
+        syncToolbarForViewport();
+      }
+    }
+
+    initializeApp();
   </script>
 </body>
 </html>
