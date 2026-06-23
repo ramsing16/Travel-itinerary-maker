@@ -1788,6 +1788,21 @@
             <h3 contenteditable="true" data-save="route-3-title" data-placeholder="路線 3">路線 3</h3>
             <p contenteditable="true" data-save="route-3-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
           </article>
+          <article class="route-card">
+            <time contenteditable="true" data-save="route-4-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-4-title" data-placeholder="路線 4">路線 4</h3>
+            <p contenteditable="true" data-save="route-4-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
+          </article>
+          <article class="route-card">
+            <time contenteditable="true" data-save="route-5-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-5-title" data-placeholder="路線 5">路線 5</h3>
+            <p contenteditable="true" data-save="route-5-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
+          </article>
+          <article class="route-card">
+            <time contenteditable="true" data-save="route-6-date" data-placeholder="日期">日期</time>
+            <h3 contenteditable="true" data-save="route-6-title" data-placeholder="路線 6">路線 6</h3>
+            <p contenteditable="true" data-save="route-6-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
+          </article>
         </div>
       </section>
 
@@ -2692,6 +2707,15 @@
         "route-3-date": escapedText("日期"),
         "route-3-title": escapedText("路線 3"),
         "route-3-body": escapedText("填寫車程、交通方式和備註。"),
+        "route-4-date": escapedText("日期"),
+        "route-4-title": escapedText("路線 4"),
+        "route-4-body": escapedText("填寫車程、交通方式和備註。"),
+        "route-5-date": escapedText("日期"),
+        "route-5-title": escapedText("路線 5"),
+        "route-5-body": escapedText("填寫車程、交通方式和備註。"),
+        "route-6-date": escapedText("日期"),
+        "route-6-title": escapedText("路線 6"),
+        "route-6-body": escapedText("填寫車程、交通方式和備註。"),
         "days-note": escapedText("填寫每日行程備註。"),
         "memo-note": escapedText("把確認事項、訂房、門票、租車與截圖集中在這裡。"),
         "screenshots-note": escapedText("加入機票、酒店、租車、球票、餐廳等確認截圖。"),
@@ -2753,7 +2777,7 @@
       accommodations.slice(0, 4).forEach((item, index) => {
         data[`hotel-${index + 1}`] = escapedText(item, index < 2 ? `住宿 ${index + 1}` : "備註", 160);
       });
-      routes.slice(0, 3).forEach((route, index) => {
+      routes.slice(0, 6).forEach((route, index) => {
         const number = index + 1;
         data[`route-${number}-date`] = escapedText(route.date, "日期", 40);
         data[`route-${number}-title`] = escapedText(route.title, `路線 ${number}`, 90);
