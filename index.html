@@ -2109,7 +2109,7 @@
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
               <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
-              <span class="map-url" data-save=""></span>
+              <span class="map-url"></span>
             </div>
           </div>
         </div>
@@ -2505,7 +2505,7 @@
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
               <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
-              <span class="map-url" data-save=""></span>
+              <span class="map-url"></span>
             </div>
           </div>
         </div>
@@ -2547,9 +2547,9 @@
           if (!mapUrl) {
             mapUrl = document.createElement("span");
             mapUrl.className = "map-url";
-            mapUrl.dataset.save = "";
             entry.appendChild(mapUrl);
           }
+          mapUrl.removeAttribute("data-save");
           const placeName = editableText(entry.querySelector(".place-name"));
           if (!address && mapUrl.textContent.includes("/maps/search/")) {
             try {
@@ -2561,7 +2561,7 @@
             }
           }
           const generatedBadPlaceUrl = mapUrl.textContent.includes("/maps/place/") && !/\/@|\/data=/.test(mapUrl.textContent);
-          if (!mapUrl.textContent || generatedBadPlaceUrl || oldMapCode) {
+          if (placeName || address || !mapUrl.textContent || generatedBadPlaceUrl || oldMapCode) {
             mapUrl.textContent = googleMapsPlaceUrl(placeName, address);
           }
           entry.querySelectorAll(".map-code").forEach((node) => node.remove());
@@ -2579,7 +2579,7 @@
         <div class="place-entry">
           <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
           <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
-          <span class="map-url" data-save=""></span>
+          <span class="map-url"></span>
         </div>
       `;
     }
@@ -2613,7 +2613,7 @@
         const placeName = editableText(entry.querySelector(".place-name"));
         const address = editableText(entry.querySelector(".place-address"));
         const savedMapUrl = editableText(entry.querySelector(".map-url"));
-        const mapUrl = normalizeGoogleMapUrl(savedMapUrl || googleMapsPlaceUrl(placeName, address));
+        const mapUrl = googleMapsPlaceUrl(placeName, address) || normalizeGoogleMapUrl(savedMapUrl);
         if (!placeName || !mapUrl) return null;
         return {
           label: placeName,
@@ -2665,7 +2665,9 @@
     function collectData() {
       const data = {};
       document.querySelectorAll("[data-save]").forEach((node) => {
-        data[node.dataset.save] = node.innerHTML;
+        const key = node.dataset.save;
+        if (!key) return;
+        data[key] = node.innerHTML;
       });
       data.daysMarkup = days.innerHTML;
       data.routeMarkup = routeStrip.innerHTML;
@@ -2686,6 +2688,7 @@
       if (data.attachmentsMarkup) attachmentGrid.innerHTML = data.attachmentsMarkup;
       document.querySelectorAll("[data-save]").forEach((node) => {
         const key = node.dataset.save;
+        if (!key) return;
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           node.innerHTML = data[key];
         }
