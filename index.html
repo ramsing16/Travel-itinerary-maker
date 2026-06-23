@@ -1477,13 +1477,42 @@
         grid-template-columns: 1fr;
       }
 
+      .days {
+        gap: 22px;
+      }
+
+      .day-card {
+        overflow: visible;
+        border-color: #cbdcdf;
+        box-shadow: 0 8px 22px rgba(24, 32, 38, .08);
+      }
+
       .day-head {
+        position: sticky;
+        top: 86px;
+        z-index: 12;
         grid-template-columns: 68px 1fr;
+        border-radius: 8px 8px 0 0;
+        background: linear-gradient(90deg, #ffffff, #eef7f8);
+        box-shadow: 0 8px 16px rgba(24, 32, 38, .08);
       }
 
       .day-actions {
         grid-column: 1 / -1;
         justify-content: end;
+      }
+
+      .day-card + .day-card {
+        margin-top: 6px;
+      }
+
+      .day-card + .day-card::before {
+        display: block;
+        height: 8px;
+        margin: 0 14px 12px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--forest), rgba(31, 111, 145, .26), transparent);
+        content: "";
       }
 
       .item {
