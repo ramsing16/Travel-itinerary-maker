@@ -77,6 +77,13 @@
           "time": "14:55",
           "title": "抵達目的地",
           "note": "入境、取行李、前往酒店或市中心。",
+          "places": [
+            {
+              "placeName": "目的地機場 / 車站名稱",
+              "address": "如有固定地點，填寫完整地址；沒有就留空",
+              "mapCode": "如有日本車機 MapCode，填寫數字碼；沒有就留空"
+            }
+          ],
           "color": "transport",
           "chip": "交通"
         },
@@ -84,6 +91,13 @@
           "time": "18:30",
           "title": "晚餐與附近散步",
           "note": "安排輕鬆晚餐，避免首日太趕。",
+          "places": [
+            {
+              "placeName": "餐廳 / 商場 / 景點名稱",
+              "address": "完整地址",
+              "mapCode": ""
+            }
+          ],
           "color": "food",
           "chip": "晚餐"
         }
@@ -99,6 +113,13 @@
           "time": "09:00",
           "title": "出發前往主要景點",
           "note": "填寫交通方式、車程或集合時間。",
+          "places": [
+            {
+              "placeName": "景點名稱",
+              "address": "完整地址",
+              "mapCode": ""
+            }
+          ],
           "color": "transport",
           "chip": "車程"
         },
@@ -106,6 +127,13 @@
           "time": "12:30",
           "title": "午餐",
           "note": "填寫餐廳、訂位或附近美食選擇。",
+          "places": [
+            {
+              "placeName": "餐廳名稱",
+              "address": "完整地址",
+              "mapCode": ""
+            }
+          ],
           "color": "food",
           "chip": "午餐"
         },
@@ -113,6 +141,13 @@
           "time": "15:00",
           "title": "下午活動",
           "note": "填寫景點、購物、門票或活動安排。",
+          "places": [
+            {
+              "placeName": "商場 / 景點名稱",
+              "address": "完整地址",
+              "mapCode": ""
+            }
+          ],
           "color": "shopping",
           "chip": "購物"
         }
