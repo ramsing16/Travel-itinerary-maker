@@ -1403,7 +1403,7 @@
 
       .top-actions {
         display: grid;
-        grid-template-columns: minmax(72px, 1fr) 44px 32px 32px 44px 44px 32px 38px;
+        grid-template-columns: minmax(62px, 1fr) 40px 30px 30px 39px 39px 39px 30px 36px;
         gap: 3px;
         width: 100%;
         overflow-x: visible;
@@ -1786,6 +1786,10 @@
         <button class="command-btn secondary" type="button" data-action="import-backup">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
           匯入
+        </button>
+        <button class="command-btn secondary" type="button" data-action="export-share">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+          分享
         </button>
         <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
@@ -2675,7 +2679,9 @@
     }
 
     function downloadTextFile(filename, text) {
-      const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+      const extension = filename.split(".").pop()?.toLowerCase();
+      const mime = extension === "html" ? "text/html;charset=utf-8" : "application/json;charset=utf-8";
+      const blob = new Blob([text], { type: mime });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -2700,6 +2706,190 @@
         showToast("已下載備份檔");
       } catch (error) {
         showToast("未能建立備份檔");
+      }
+    }
+
+    function shareFileName() {
+      const date = new Date().toISOString().slice(0, 10);
+      const rawName = defaultTripName();
+      const safeName = rawName.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").slice(0, 42) || "itinerary";
+      return `${safeName}-share-${date}.html`;
+    }
+
+    function removeUnsafeAttributes(root) {
+      root.querySelectorAll("*").forEach((node) => {
+        [...node.attributes].forEach((attribute) => {
+          const name = attribute.name.toLowerCase();
+          const value = attribute.value.trim().toLowerCase();
+          if (name.startsWith("on") || name === "srcdoc" || ((name === "href" || name === "src") && value.startsWith("javascript:"))) {
+            node.removeAttribute(attribute.name);
+          }
+        });
+      });
+    }
+
+    function buildShareHtml() {
+      saveData();
+      normalizeMapLinks();
+      const title = defaultTripName();
+      const readonlyApp = app.cloneNode(true);
+      readonlyApp.classList.add("share-readonly");
+
+      readonlyApp.querySelector(".top-actions")?.remove();
+      readonlyApp.querySelector(".privacy-pill")?.remove();
+      readonlyApp.querySelector("#backup-input")?.remove();
+      readonlyApp.querySelector("#screenshot-input")?.remove();
+      readonlyApp.querySelector("#plan-file-input")?.remove();
+      readonlyApp.querySelector("#toast")?.remove();
+      readonlyApp.querySelector("#lightbox")?.remove();
+      readonlyApp.querySelectorAll("template, .plan-import, .add-day-panel, .color-row, .item-color-row, .day-actions, .delete-item, .delete-memo, .delete-attachment, .upload-category-grid, input, select, textarea").forEach((node) => node.remove());
+      readonlyApp.querySelectorAll("button").forEach((button) => {
+        if (button.dataset.action !== "open-map") button.remove();
+      });
+      readonlyApp.querySelectorAll("[contenteditable]").forEach((node) => {
+        node.removeAttribute("contenteditable");
+        node.removeAttribute("tabindex");
+        node.classList.remove("editable-placeholder");
+        node.removeAttribute("data-placeholder-active");
+      });
+      readonlyApp.querySelectorAll(".day-date").forEach((node) => {
+        node.removeAttribute("role");
+        node.removeAttribute("tabindex");
+      });
+      readonlyApp.querySelectorAll("[data-save], [data-placeholder], [data-color-row], [data-date-field]").forEach((node) => {
+        node.removeAttribute("data-save");
+        node.removeAttribute("data-placeholder");
+        node.removeAttribute("data-color-row");
+        node.removeAttribute("data-date-field");
+      });
+      readonlyApp.querySelectorAll("[data-action]").forEach((node) => {
+        if (!["open-map", "open-image"].includes(node.dataset.action)) node.removeAttribute("data-action");
+      });
+      removeUnsafeAttributes(readonlyApp);
+
+      const styleText = document.querySelector("style")?.textContent || "";
+      const shareStyle = `
+        body { background: #f4f7f8; }
+        .share-readonly { padding-bottom: 0; }
+        .share-readonly .topbar {
+          position: static;
+          display: block;
+          padding: 16px;
+          background: #ffffff;
+        }
+        .share-readonly .brand strong,
+        .share-readonly .brand span {
+          overflow: visible;
+          white-space: normal;
+        }
+        .share-readonly .hero {
+          min-height: auto;
+        }
+        .share-readonly .hero-copy {
+          padding-top: 80px;
+          padding-bottom: 80px;
+        }
+        .share-readonly .day-head {
+          top: 0 !important;
+        }
+        .share-readonly .map-link,
+        .share-readonly .zoomable-image {
+          cursor: pointer;
+        }
+        .share-readonly .day-date {
+          cursor: default;
+        }
+        .share-readonly .date-hint,
+        .share-readonly .empty-note:empty {
+          display: none !important;
+        }
+        .share-readonly [contenteditable="true"]:focus {
+          outline: 0;
+          background: transparent;
+        }
+        .share-banner {
+          max-width: 1160px;
+          margin: 12px auto 0;
+          padding: 10px 14px;
+          border: 1px solid #c8dfd9;
+          border-radius: 8px;
+          background: #edf7f4;
+          color: #1f6558;
+          font-size: 14px;
+          font-weight: 750;
+        }
+        @media (max-width: 640px) {
+          .share-banner {
+            margin: 8px 8px 0;
+            font-size: 13px;
+          }
+          .share-readonly .hero-copy {
+            padding-top: 44px;
+            padding-bottom: 54px;
+          }
+        }
+      `;
+      const shareScript = `
+        (() => {
+          const lightbox = document.querySelector("#lightbox");
+          const lightboxImage = lightbox?.querySelector("img");
+          function openImage(image) {
+            if (!lightbox || !lightboxImage) return;
+            lightboxImage.src = image.src;
+            lightboxImage.alt = image.alt || "截圖預覽";
+            lightbox.classList.add("show");
+            lightbox.setAttribute("aria-hidden", "false");
+          }
+          function closeImage() {
+            if (!lightbox || !lightboxImage) return;
+            lightbox.classList.remove("show");
+            lightbox.setAttribute("aria-hidden", "true");
+            lightboxImage.removeAttribute("src");
+          }
+          document.addEventListener("click", (event) => {
+            const mapButton = event.target.closest("[data-action='open-map']");
+            if (mapButton) {
+              event.preventDefault();
+              const url = mapButton.dataset.mapUrl;
+              if (url) window.open(url, "_blank", "noopener");
+              return;
+            }
+            const image = event.target.closest("[data-action='open-image']");
+            if (image?.tagName === "IMG") openImage(image);
+            if (event.target === lightbox || event.target.closest("[data-action='close-image']")) closeImage();
+          });
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeImage();
+          });
+        })();
+      `;
+
+      return `<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeAttr(title)} 分享版</title>
+  <style>${styleText}\n${shareStyle}</style>
+</head>
+<body>
+  <div class="share-banner">只讀分享版：可以查看行程、地圖連結和截圖，但不能編輯。</div>
+  ${readonlyApp.outerHTML}
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" type="button" data-action="close-image" aria-label="關閉圖片"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <img alt="">
+  </div>
+  <script>${shareScript}<\\/script>
+</body>
+</html>`;
+    }
+
+    function exportShareHtml() {
+      try {
+        downloadTextFile(shareFileName(), buildShareHtml());
+        showToast("已下載分享版 HTML");
+      } catch (error) {
+        showToast("未能建立分享版");
       }
     }
 
@@ -3447,6 +3637,7 @@
       if (action === "save-trip") saveCurrentTrip({ silent: false });
       if (action === "export-backup") exportBackup();
       if (action === "import-backup") backupInput.click();
+      if (action === "export-share") exportShareHtml();
       if (action === "new-trip") createNewTrip();
       if (action === "delete-trip") deleteCurrentTrip();
       if (action === "add-day") addDay();
