@@ -2323,6 +2323,148 @@
       return cleanState;
     }
 
+    function plainText(value, fallback = "", limit = 900) {
+      const text = String(value ?? fallback).replace(/\s+/g, " ").trim();
+      return (text || fallback).slice(0, limit);
+    }
+
+    function escapedText(value, fallback = "", limit = 900) {
+      const node = document.createElement("span");
+      node.textContent = plainText(value, fallback, limit);
+      return node.innerHTML;
+    }
+
+    function blankImportData() {
+      return {
+        "trip-title": escapedText("我的行程表"),
+        "trip-subtitle": escapedText("日期 / 地點 / 主題"),
+        "hero-eyebrow": escapedText("TRIP PLAN"),
+        "hero-title": escapedText("我的旅程"),
+        "hero-copy": escapedText("填寫旅程目的地、日期、重點和同行備註。"),
+        "stat-days": escapedText("未設定"),
+        "stat-drive": escapedText("未設定"),
+        "stat-hotels": escapedText("未設定"),
+        "stat-theme": escapedText("未設定"),
+        "overview-note": escapedText("填寫總覽備註。"),
+        "flight-out-title": escapedText("去程航班 / 交通"),
+        "flight-out-start": escapedText("時間"),
+        "flight-out-from": escapedText("出發地點"),
+        "flight-out-end": escapedText("時間"),
+        "flight-out-to": escapedText("抵達地點 / 航班 / 交通備註"),
+        "flight-out-transfer": escapedText("交通備註"),
+        "flight-out-food": escapedText("餐飲備註"),
+        "flight-back-title": escapedText("回程航班 / 交通"),
+        "flight-back-start": escapedText("時間"),
+        "flight-back-from": escapedText("出發地點"),
+        "flight-back-end": escapedText("時間"),
+        "flight-back-to": escapedText("抵達地點 / 航班 / 交通備註"),
+        "flight-back-buffer": escapedText("機場 / 車程備註"),
+        "flight-back-food": escapedText("餐飲備註"),
+        "hotel-1": escapedText("住宿 1"),
+        "hotel-2": escapedText("住宿 2"),
+        "hotel-3": escapedText("交通 / 租車備註"),
+        "hotel-4": escapedText("費用 / 現金備註"),
+        "route-note": escapedText("填寫車程、交通或路線備註。"),
+        "route-1-date": escapedText("日期"),
+        "route-1-title": escapedText("路線 1"),
+        "route-1-body": escapedText("填寫車程、交通方式和備註。"),
+        "route-2-date": escapedText("日期"),
+        "route-2-title": escapedText("路線 2"),
+        "route-2-body": escapedText("填寫車程、交通方式和備註。"),
+        "route-3-date": escapedText("日期"),
+        "route-3-title": escapedText("路線 3"),
+        "route-3-body": escapedText("填寫車程、交通方式和備註。"),
+        "days-note": escapedText("填寫每日行程備註。"),
+        "memo-note": escapedText("把確認事項、訂房、門票、租車與截圖集中在這裡。"),
+        "screenshots-note": escapedText("加入機票、酒店、租車、球票、餐廳等確認截圖。"),
+      };
+    }
+
+    function memoMarkupFromItems(items = []) {
+      const wrapper = document.createElement("ul");
+      items.map((item) => plainText(item)).filter(Boolean).forEach((item, index) => {
+        const node = document.querySelector("#memo-template").content.firstElementChild.cloneNode(true);
+        const field = node.querySelector("[contenteditable='true']");
+        field.dataset.save = `imported-memo-${index + 1}-${Date.now()}`;
+        field.textContent = item;
+        wrapper.appendChild(node);
+      });
+      return wrapper.innerHTML;
+    }
+
+    function stateFromAiImportPayload(payload) {
+      const parsedDays = normalizeAiPayload(payload);
+      if (!parsedDays.length) return null;
+      const trip = payload.trip || {};
+      const overview = payload.overview || {};
+      const outbound = overview.outbound || payload.outbound || {};
+      const inbound = overview.inbound || payload.inbound || {};
+      const stats = trip.stats || payload.stats || {};
+      const accommodations = Array.isArray(overview.accommodation) ? overview.accommodation : Array.isArray(payload.accommodation) ? payload.accommodation : [];
+      const routes = Array.isArray(payload.routes) ? payload.routes : [];
+      const checklists = Array.isArray(payload.checklists) ? payload.checklists : Array.isArray(payload.checklist) ? payload.checklist : [];
+      const data = blankImportData();
+      const tripName = plainText(trip.name || payload.name, "我的行程表", 80);
+
+      data["trip-title"] = escapedText(tripName, "我的行程表", 80);
+      data["trip-subtitle"] = escapedText(trip.subtitle || payload.subtitle, "日期 / 地點 / 主題", 120);
+      data["hero-eyebrow"] = escapedText(trip.eyebrow || payload.eyebrow, "TRIP PLAN", 40);
+      data["hero-title"] = escapedText(trip.title || tripName, tripName, 80);
+      data["hero-copy"] = escapedText(trip.summary || payload.summary, "填寫旅程目的地、日期、重點和同行備註。", 260);
+      data["stat-days"] = escapedText(stats.duration, "未設定", 40);
+      data["stat-drive"] = escapedText(stats.transport, "未設定", 40);
+      data["stat-hotels"] = escapedText(stats.stays, "未設定", 40);
+      data["stat-theme"] = escapedText(stats.theme, "未設定", 40);
+      data["overview-note"] = escapedText(overview.note, "填寫總覽備註。", 180);
+
+      data["flight-out-title"] = escapedText(outbound.title, "去程航班 / 交通", 100);
+      data["flight-out-start"] = escapedText(outbound.startTime, "時間", 24);
+      data["flight-out-from"] = escapedText(outbound.from, "出發地點", 100);
+      data["flight-out-end"] = escapedText(outbound.endTime, "時間", 24);
+      data["flight-out-to"] = escapedText(outbound.to || outbound.note, "抵達地點 / 航班 / 交通備註", 140);
+      data["flight-out-transfer"] = escapedText(outbound.transfer, "交通備註", 100);
+      data["flight-out-food"] = escapedText(outbound.food, "餐飲備註", 100);
+      data["flight-back-title"] = escapedText(inbound.title, "回程航班 / 交通", 100);
+      data["flight-back-start"] = escapedText(inbound.startTime, "時間", 24);
+      data["flight-back-from"] = escapedText(inbound.from, "出發地點", 100);
+      data["flight-back-end"] = escapedText(inbound.endTime, "時間", 24);
+      data["flight-back-to"] = escapedText(inbound.to || inbound.note, "抵達地點 / 航班 / 交通備註", 140);
+      data["flight-back-buffer"] = escapedText(inbound.transfer || inbound.buffer, "機場 / 車程備註", 100);
+      data["flight-back-food"] = escapedText(inbound.food, "餐飲備註", 100);
+
+      accommodations.slice(0, 4).forEach((item, index) => {
+        data[`hotel-${index + 1}`] = escapedText(item, index < 2 ? `住宿 ${index + 1}` : "備註", 160);
+      });
+      routes.slice(0, 3).forEach((route, index) => {
+        const number = index + 1;
+        data[`route-${number}-date`] = escapedText(route.date, "日期", 40);
+        data[`route-${number}-title`] = escapedText(route.title, `路線 ${number}`, 90);
+        data[`route-${number}-body`] = escapedText(route.note || route.body, "填寫車程、交通方式和備註。", 180);
+      });
+      data["route-note"] = escapedText(payload.routeNote || overview.routeNote, "填寫車程、交通或路線備註。", 160);
+      data["days-note"] = escapedText(payload.daysNote, "填寫每日行程備註。", 160);
+      data["memo-note"] = escapedText(payload.memoNote, "把確認事項、訂房、門票、租車與截圖集中在這裡。", 160);
+      data.memoMarkup = memoMarkupFromItems(checklists);
+
+      const daysWrapper = document.createElement("div");
+      parsedDays.forEach((day) => daysWrapper.appendChild(createDay(day)));
+      data.daysMarkup = daysWrapper.innerHTML || '<p class="empty-note">未加入每日行程。按「新日期」開始建立。</p>';
+      data.attachmentsMarkup = '<p class="empty-note">未加入截圖。按上方分類按鈕可放入確認資料。</p>';
+
+      const id = `ai-import-${Date.now()}`;
+      return {
+        currentTripId: id,
+        trips: {
+          [id]: {
+            id,
+            name: tripName,
+            updatedAt: new Date().toISOString(),
+            data,
+          },
+        },
+      };
+    }
+
     function restoreTripsState(state) {
       currentTripId = state.currentTripId;
       saveTripsState(state);
@@ -2341,11 +2483,11 @@
         try {
           const parsed = JSON.parse(String(reader.result || ""));
           const rawState = parsed?.state?.trips ? parsed.state : parsed;
-          const state = sanitizeTripsState(rawState);
+          const state = sanitizeTripsState(rawState) || stateFromAiImportPayload(parsed);
           if (!state) throw new Error("Invalid backup");
-          if (!window.confirm("匯入備份會取代此裝置瀏覽器內現有行程表。只應匯入自己信任的備份檔。是否繼續？")) return;
+          if (!window.confirm("匯入檔案會取代此裝置瀏覽器內現有行程表。只應匯入自己信任的 JSON 檔。是否繼續？")) return;
           restoreTripsState(state);
-          showToast("已匯入備份");
+          showToast("已匯入行程");
         } catch (error) {
           showToast("備份檔格式不正確");
         }
