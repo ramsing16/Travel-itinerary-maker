@@ -1365,62 +1365,6 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
     }
 
-    .share-dialog {
-      position: fixed;
-      inset: 0;
-      z-index: 70;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(12, 18, 22, .72);
-    }
-
-    .share-dialog.show {
-      display: flex;
-    }
-
-    .share-dialog-panel {
-      width: min(560px, 100%);
-      padding: 16px;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 22px 60px rgba(12, 18, 22, .28);
-    }
-
-    .share-dialog-panel h3 {
-      margin: 0 0 8px;
-      font-size: 20px;
-      line-height: 1.25;
-    }
-
-    .share-dialog-panel p {
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .share-url-box {
-      width: 100%;
-      min-height: 132px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f8fbfa;
-      color: var(--ink);
-      font-size: 13px;
-      line-height: 1.35;
-      resize: vertical;
-    }
-
-    .share-dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
     @media (max-width: 900px) {
       .hero {
         grid-template-columns: 1fr;
@@ -1945,10 +1889,6 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
           分享
         </button>
-        <button class="command-btn secondary" type="button" data-action="copy-share-link">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"/></svg>
-          連結
-        </button>
         <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
         </button>
@@ -2155,17 +2095,6 @@
       <button class="lightbox-close" type="button" data-action="close-image" aria-label="關閉圖片"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <img alt="">
     </div>
-    <div class="share-dialog" id="share-dialog" aria-hidden="true">
-      <div class="share-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="share-dialog-title">
-        <h3 id="share-dialog-title">分享網址</h3>
-        <p>此連結包含目前行程文字、地點和地圖連結，不包含截圖。不要公開分享含私人資料的行程。</p>
-        <textarea class="share-url-box" id="share-url-box" readonly aria-label="分享網址"></textarea>
-        <div class="share-dialog-actions">
-          <button class="command-btn secondary" type="button" data-action="copy-share-dialog">複製</button>
-          <button class="command-btn primary" type="button" data-action="close-share-dialog">完成</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <template id="item-template">
@@ -2257,8 +2186,6 @@
     const tripSelect = document.querySelector("#trip-select");
     const tripNameInput = document.querySelector("#trip-name-input");
     const lightbox = document.querySelector("#lightbox");
-    const shareDialog = document.querySelector("#share-dialog");
-    const shareUrlBox = document.querySelector("#share-url-box");
     const toast = document.querySelector("#toast");
     const storageKey = "travel-itinerary-maker-v2";
     const tripsStorageKey = "travel-itinerary-maker-trips-v2";
@@ -2888,182 +2815,6 @@
       window.setTimeout(() => URL.revokeObjectURL(url), 500);
     }
 
-    function bytesToBase64Url(bytes) {
-      let binary = "";
-      bytes.forEach((byte) => {
-        binary += String.fromCharCode(byte);
-      });
-      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    }
-
-    function base64UrlToBytes(value) {
-      const base64 = String(value || "").replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(String(value || "").length / 4) * 4, "=");
-      const binary = atob(base64);
-      return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    }
-
-    function base64UrlEncodeText(text) {
-      return bytesToBase64Url(new TextEncoder().encode(text));
-    }
-
-    function base64UrlDecodeText(value) {
-      return new TextDecoder().decode(base64UrlToBytes(value));
-    }
-
-    async function gzipToBase64Url(text) {
-      if (!("CompressionStream" in window)) return "";
-      const stream = new CompressionStream("gzip");
-      const writer = stream.writable.getWriter();
-      await writer.write(new TextEncoder().encode(text));
-      await writer.close();
-      const buffer = await new Response(stream.readable).arrayBuffer();
-      return bytesToBase64Url(new Uint8Array(buffer));
-    }
-
-    async function gunzipFromBase64Url(value) {
-      if (!("DecompressionStream" in window)) throw new Error("Unsupported compression");
-      const stream = new DecompressionStream("gzip");
-      const writer = stream.writable.getWriter();
-      await writer.write(base64UrlToBytes(value));
-      await writer.close();
-      const buffer = await new Response(stream.readable).arrayBuffer();
-      return new TextDecoder().decode(buffer);
-    }
-
-    function shareUrlBase() {
-      const url = new URL(window.location.href);
-      url.search = "";
-      url.hash = "";
-      return url.toString();
-    }
-
-    function collectShareLinkData() {
-      const data = collectData();
-      data.daysMarkup = compactShareMarkup(data.daysMarkup);
-      data.attachmentsMarkup = '<p class="empty-note">分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。</p>';
-      data["screenshots-note"] = "分享連結不包含截圖。需要截圖請使用「分享」HTML 檔。";
-      return data;
-    }
-
-    function compactShareMarkup(html) {
-      const template = document.createElement("template");
-      template.innerHTML = String(html || "");
-      template.content.querySelectorAll(".map-link-row").forEach((node) => node.remove());
-      template.content.querySelectorAll(".map-url").forEach((node) => {
-        node.textContent = "";
-        node.removeAttribute("data-save");
-      });
-      return template.innerHTML;
-    }
-
-    async function buildShareUrl() {
-      saveData();
-      const payload = {
-        app: "travel-itinerary-maker",
-        type: "share-url",
-        version: 1,
-        name: defaultTripName(),
-        exportedAt: new Date().toISOString(),
-        note: "此分享連結不包含截圖。不要公開含私人行程資料的連結。",
-        data: collectShareLinkData(),
-      };
-      const json = JSON.stringify(payload);
-      let compressed = "";
-      try {
-        compressed = await gzipToBase64Url(json);
-      } catch (error) {
-        compressed = "";
-      }
-      const encoded = compressed ? `gz.${compressed}` : `b64.${base64UrlEncodeText(json)}`;
-      const url = new URL(shareUrlBase());
-      url.hash = `share=${encoded}`;
-      return url.toString();
-    }
-
-    function openShareDialog(url) {
-      if (!shareDialog || !shareUrlBox) return;
-      shareUrlBox.value = url;
-      shareDialog.classList.add("show");
-      shareDialog.setAttribute("aria-hidden", "false");
-      shareUrlBox.focus();
-      shareUrlBox.select();
-    }
-
-    function closeShareDialog() {
-      if (!shareDialog || !shareUrlBox) return;
-      shareDialog.classList.remove("show");
-      shareDialog.setAttribute("aria-hidden", "true");
-      shareUrlBox.value = "";
-    }
-
-    async function copyTextWithFallback(text) {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-      if (shareUrlBox) {
-        shareUrlBox.focus();
-        shareUrlBox.select();
-      }
-      return document.execCommand?.("copy") || false;
-    }
-
-    async function copyShareUrl() {
-      try {
-        const url = await buildShareUrl();
-        openShareDialog(url);
-        if (url.length > 30000) showToast("分享網址較長，部分通訊軟件可能不支援");
-        try {
-          const copied = await copyTextWithFallback(url);
-          showToast(copied ? "已複製分享網址（不含截圖）" : "請手動複製分享網址");
-        } catch (error) {
-          showToast("請手動複製分享網址");
-        }
-      } catch (error) {
-        showToast("未能建立分享網址");
-      }
-    }
-
-    async function parseSharedUrlPayload() {
-      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-      const value = new URLSearchParams(window.location.search).get("share") || new URLSearchParams(hash).get("share");
-      if (!value) return null;
-      const separator = value.indexOf(".");
-      if (separator < 0) return null;
-      const mode = value.slice(0, separator);
-      const body = value.slice(separator + 1);
-      const json = mode === "gz" ? await gunzipFromBase64Url(body) : base64UrlDecodeText(body);
-      const payload = JSON.parse(json);
-      if (payload?.app !== "travel-itinerary-maker" || payload?.type !== "share-url" || !payload.data) return null;
-      return payload;
-    }
-
-    async function restoreSharedUrlData() {
-      const payload = await parseSharedUrlPayload();
-      if (!payload) return false;
-      const data = sanitizeBackupData(payload.data);
-      if (!Object.keys(data).length) return false;
-      applyData(data);
-      currentTripId = "shared-url";
-      if (tripNameInput) tripNameInput.value = payload.name || defaultTripName();
-      renderTripSelect({
-        currentTripId,
-        trips: {
-          [currentTripId]: {
-            id: currentTripId,
-            name: payload.name || "分享行程",
-            updatedAt: payload.exportedAt || new Date().toISOString(),
-            data,
-          },
-        },
-      });
-      prepareEditableFields();
-      ensureAttachmentNote();
-      updateStickyDayOffset();
-      showToast("已載入分享行程（不含截圖）");
-      return true;
-    }
-
     function exportBackup() {
       saveData();
       try {
@@ -3153,10 +2904,15 @@
         body { background: #f4f7f8; }
         .share-readonly { padding-bottom: 0; }
         .share-readonly .topbar {
-          position: static;
+          position: sticky;
+          top: 0;
+          z-index: 30;
           display: block;
-          padding: 16px;
-          background: #ffffff;
+          padding: 12px 14px;
+          background: rgba(244, 247, 248, .96);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          box-shadow: 0 1px 0 rgba(24, 32, 38, .08);
         }
         .share-readonly .brand strong,
         .share-readonly .brand span {
@@ -3170,10 +2926,14 @@
           padding-top: 80px;
           padding-bottom: 80px;
         }
+        .share-readonly .day-card {
+          overflow: visible;
+        }
         .share-readonly .day-head {
-          position: static !important;
-          top: auto !important;
-          box-shadow: none;
+          position: sticky !important;
+          top: var(--share-sticky-day-offset, 0px) !important;
+          z-index: 20;
+          box-shadow: 0 10px 20px rgba(24, 32, 38, .08);
         }
         .share-readonly .map-link,
         .share-readonly .zoomable-image {
@@ -3216,6 +2976,12 @@
         (() => {
           const lightbox = document.querySelector("#lightbox");
           const lightboxImage = lightbox?.querySelector("img");
+          function updateShareStickyOffset() {
+            const topbar = document.querySelector(".share-readonly .topbar");
+            const isMobile = window.matchMedia("(max-width: 640px)").matches;
+            const offset = isMobile && topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 0;
+            document.documentElement.style.setProperty("--share-sticky-day-offset", offset + "px");
+          }
           function openImage(image) {
             if (!lightbox || !lightboxImage) return;
             lightboxImage.src = image.src;
@@ -3237,6 +3003,9 @@
           document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") closeImage();
           });
+          window.addEventListener("resize", updateShareStickyOffset);
+          window.addEventListener("orientationchange", () => window.setTimeout(updateShareStickyOffset, 250));
+          updateShareStickyOffset();
         })();
       `;
 
@@ -4011,16 +3780,6 @@
       }
       if (action === "open-image") openImage(actionButton);
       if (action === "close-image") closeImage();
-      if (action === "close-share-dialog") {
-        closeShareDialog();
-        return;
-      }
-      if (action === "copy-share-dialog") {
-        copyTextWithFallback(shareUrlBox?.value || "")
-          .then((copied) => showToast(copied ? "已複製分享網址" : "請手動複製分享網址"))
-          .catch(() => showToast("請手動複製分享網址"));
-        return;
-      }
       if (action === "toggle-toolbar") {
         setToolbarOpen(!topbar?.classList.contains("toolbar-open"));
         return;
@@ -4031,7 +3790,6 @@
       if (action === "export-backup") exportBackup();
       if (action === "import-backup") backupInput.click();
       if (action === "export-share") exportShareHtml();
-      if (action === "copy-share-link") copyShareUrl();
       if (action === "new-trip") createNewTrip();
       if (action === "delete-trip") deleteCurrentTrip();
       if (action === "add-day") addDay();
@@ -4079,13 +3837,8 @@
       if (event.target === lightbox) closeImage();
     });
 
-    shareDialog?.addEventListener("click", (event) => {
-      if (event.target === shareDialog) closeShareDialog();
-    });
-
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && lightbox.classList.contains("show")) closeImage();
-      if (event.key === "Escape" && shareDialog?.classList.contains("show")) closeShareDialog();
     });
 
     app.addEventListener("change", (event) => {
@@ -4121,22 +3874,11 @@
     window.addEventListener("orientationchange", () => window.setTimeout(syncToolbarForViewport, 250));
     window.addEventListener("beforeprint", saveData);
 
-    async function initializeApp() {
-      try {
-        const restoredShare = await restoreSharedUrlData();
-        if (!restoredShare) {
-          restoreData();
-          prepareEditableFields();
-          ensureAttachmentNote();
-          syncToolbarForViewport();
-        }
-      } catch (error) {
-        showToast("分享網址格式不正確");
-        restoreData();
-        prepareEditableFields();
-        ensureAttachmentNote();
-        syncToolbarForViewport();
-      }
+    function initializeApp() {
+      restoreData();
+      prepareEditableFields();
+      ensureAttachmentNote();
+      syncToolbarForViewport();
     }
 
     initializeApp();
