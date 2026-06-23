@@ -66,7 +66,7 @@
 
     .app {
       min-height: 100vh;
-      padding-bottom: 88px;
+      padding-bottom: 24px;
     }
 
     .topbar {
@@ -119,8 +119,7 @@
       line-height: 1.2;
     }
 
-    .top-actions,
-    .bottom-actions {
+    .top-actions {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -148,6 +147,7 @@
     }
 
     .trip-name-input {
+      display: none;
       min-width: 160px;
       flex: 1;
     }
@@ -489,6 +489,11 @@
       color: #263c6d;
     }
 
+    .chip.shopping {
+      background: #eef5e8;
+      color: #3c6b2e;
+    }
+
     .hotel-list,
     .memo-list {
       display: grid;
@@ -624,7 +629,18 @@
       height: 100%;
       border: 0;
       opacity: 0;
-      pointer-events: auto;
+      pointer-events: none;
+    }
+
+    .date-hint {
+      display: block;
+      margin-top: 5px;
+      padding: 3px 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .16);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
     }
 
     .add-day-panel {
@@ -674,6 +690,14 @@
       color: #7a4310;
     }
 
+    .day-note[data-note-color="shopping"] {
+      color: #3c6b2e;
+    }
+
+    .item-note[data-note-color="shopping"] {
+      color: #3c6b2e;
+    }
+
     .day-note[data-note-color="important"] {
       color: var(--coral);
     }
@@ -702,6 +726,11 @@
     .day-note[data-note-color="food"]::before,
     .item-note[data-note-color="food"]::before {
       content: "美食 / 訂位：";
+    }
+
+    .day-note[data-note-color="shopping"]::before,
+    .item-note[data-note-color="shopping"]::before {
+      content: "購物：";
     }
 
     .day-note[data-note-color="important"]::before,
@@ -771,6 +800,10 @@
       background: var(--ochre);
     }
 
+    .legend-swatch[data-note-color="shopping"] {
+      background: #6f9b4e;
+    }
+
     .legend-swatch[data-note-color="important"] {
       background: var(--coral);
     }
@@ -811,6 +844,10 @@
       background: var(--ochre);
     }
 
+    .color-dot[data-note-color="shopping"] {
+      background: #6f9b4e;
+    }
+
     .color-dot[data-note-color="important"] {
       background: var(--coral);
     }
@@ -848,6 +885,9 @@
 
     .item-body {
       min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 32px;
+      gap: 7px 8px;
     }
 
     .item-body h4 {
@@ -857,10 +897,32 @@
     }
 
     .item-body p {
+      grid-column: 1 / -1;
       margin: 6px 0 0;
       color: var(--muted);
       font-size: 14px;
       line-height: 1.55;
+    }
+
+    .item-body .chip-row,
+    .item-color-row {
+      grid-column: 1 / -1;
+    }
+
+    .map-btn {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 8px;
+      background: #edf7f4;
+      color: var(--forest);
+      box-shadow: inset 0 0 0 1px rgba(34, 85, 75, .15);
+    }
+
+    .map-btn .icon {
+      width: 16px;
+      height: 16px;
     }
 
     .delete-item {
@@ -1158,27 +1220,6 @@
       text-align: center;
     }
 
-    .bottom-actions {
-      position: fixed;
-      right: 12px;
-      bottom: 12px;
-      left: 12px;
-      z-index: 25;
-      justify-content: center;
-      padding: 10px;
-      border: 1px solid rgba(217, 224, 229, .92);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, .94);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .bottom-actions .command-btn {
-      flex: 1;
-      justify-content: center;
-      max-width: 220px;
-    }
-
     .toast {
       position: fixed;
       right: 18px;
@@ -1273,51 +1314,69 @@
         width: 100%;
       }
 
+      .brand span:not(.privacy-pill),
+      .privacy-pill {
+        display: none;
+      }
+
       .top-actions {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
+        grid-template-columns: minmax(72px, 1fr) 44px 32px 32px 44px 44px 32px 38px;
+        gap: 3px;
         width: 100%;
         overflow-x: visible;
         padding-bottom: 0;
       }
 
       .trip-manager {
-        display: grid;
-        grid-column: 1 / -1;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px 42px;
-        gap: 8px;
-        min-width: 100%;
-      }
-
-      .trip-select,
-      .trip-name-input {
-        grid-column: 1 / -1;
-        width: 100%;
+        display: contents;
         min-width: 0;
       }
 
+      .trip-select {
+        width: 100%;
+        min-width: 0;
+        min-height: 34px;
+        padding: 4px 5px;
+        font-size: 11px;
+      }
+
       .trip-manager [data-action="save-trip"] {
-        grid-column: 1 / 3;
+        grid-column: auto;
         justify-content: center;
         width: 100%;
-        padding: 0 8px;
+        min-height: 34px;
+        padding: 0 2px;
       }
 
       .trip-manager .icon-btn {
-        width: 42px;
+        width: 100%;
+        min-height: 34px;
       }
 
       .top-actions > .command-btn {
         justify-content: center;
         width: 100%;
         min-width: 0;
-        padding: 0 8px;
+        min-height: 34px;
+        padding: 0 2px;
       }
 
       .top-actions > .icon-btn {
         width: 100%;
         min-width: 0;
+        min-height: 34px;
+      }
+
+      .top-actions .command-btn {
+        gap: 2px;
+        font-size: 10px;
+        line-height: 1;
+      }
+
+      .top-actions .icon {
+        width: 13px;
+        height: 13px;
       }
 
       .hero {
@@ -1400,7 +1459,6 @@
       }
 
       .topbar,
-      .bottom-actions,
       .plan-import,
       .day-actions,
       .delete-item,
@@ -1538,10 +1596,10 @@
       <div class="top-actions">
         <div class="trip-manager">
           <select class="trip-select" id="trip-select" aria-label="選擇行程表"></select>
-          <input class="trip-name-input" id="trip-name-input" type="text" value="我的行程表" aria-label="行程表名稱">
+          <input class="trip-name-input" id="trip-name-input" type="hidden" value="我的行程表" aria-label="行程表名稱">
           <button class="command-btn secondary" type="button" data-action="save-trip" title="儲存到此裝置" aria-label="儲存到此裝置">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
-            本機儲存
+            儲存
           </button>
           <button class="icon-btn" type="button" data-action="new-trip" title="另存新行程表" aria-label="另存新行程表">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -1552,11 +1610,11 @@
         </div>
         <button class="command-btn secondary" type="button" data-action="export-backup">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-          匯出備份
+          匯出
         </button>
         <button class="command-btn secondary" type="button" data-action="import-backup">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
-          匯入備份
+          匯入
         </button>
         <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
@@ -1678,6 +1736,7 @@
           <span class="legend-item"><span class="legend-swatch" data-note-color="hotel"></span>住宿</span>
           <span class="legend-item"><span class="legend-swatch" data-note-color="transport"></span>航班 / 交通</span>
           <span class="legend-item"><span class="legend-swatch" data-note-color="food"></span>美食 / 訂位</span>
+          <span class="legend-item"><span class="legend-swatch" data-note-color="shopping"></span>購物</span>
           <span class="legend-item"><span class="legend-swatch" data-note-color="important"></span>重要提醒</span>
         </div>
         <div class="days" id="days">
@@ -1771,16 +1830,6 @@
       </section>
     </main>
 
-    <nav class="bottom-actions" aria-label="主要操作">
-      <button class="command-btn primary" type="button" data-action="print">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-        PDF
-      </button>
-      <button class="command-btn danger" type="button" data-action="reset">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
-        重置
-      </button>
-    </nav>
     <input id="backup-input" type="file" accept="application/json,.json" hidden>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="lightbox" id="lightbox" aria-hidden="true">
@@ -1794,6 +1843,7 @@
       <div class="item-time" contenteditable="true" data-save="" data-placeholder="時間">時間</div>
       <div class="item-body">
         <h4 contenteditable="true" data-save="" data-placeholder="新增景點 / 餐廳 / 車程">新增景點 / 餐廳 / 車程</h4>
+        <button class="map-btn" type="button" data-action="open-map" title="在 Google Maps 搜尋" aria-label="在 Google Maps 搜尋"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11z"/><path d="M12 10h.01"/></svg></button>
         <p contenteditable="true" data-save="" data-placeholder="填寫地址、停留時間、訂位資料或備註。">填寫地址、停留時間、訂位資料或備註。</p>
         <div class="chip-row"><span class="chip" contenteditable="true" data-save="" data-placeholder="備註">備註</span></div>
       </div>
@@ -1812,6 +1862,7 @@
             <button class="color-dot active" type="button" data-action="note-color" data-note-color="hotel" title="住宿" aria-label="住宿色"></button>
             <button class="color-dot" type="button" data-action="note-color" data-note-color="transport" title="航班交通" aria-label="航班交通色"></button>
             <button class="color-dot" type="button" data-action="note-color" data-note-color="food" title="美食訂位" aria-label="美食訂位色"></button>
+            <button class="color-dot" type="button" data-action="note-color" data-note-color="shopping" title="購物" aria-label="購物色"></button>
             <button class="color-dot" type="button" data-action="note-color" data-note-color="important" title="重要提醒" aria-label="重要提醒色"></button>
           </div>
         </div>
@@ -1913,7 +1964,7 @@
       node.dataset.dateIso = iso;
       node.setAttribute("role", "button");
       node.setAttribute("tabindex", "0");
-      node.innerHTML = `${parsed.month}/${parsed.day}<small>${parsed.weekday}</small><input class="date-picker" type="date" value="${iso}" aria-label="選擇日期">`;
+      node.innerHTML = `${parsed.month}/${parsed.day}<small>${parsed.weekday}</small><span class="date-hint">選日期</span><input class="date-picker" type="date" value="${iso}" aria-label="選擇日期">`;
     }
 
     function openDatePicker(dayDate) {
@@ -2044,6 +2095,7 @@
         ["hotel", "住宿", "住宿色"],
         ["transport", "航班交通", "航班交通色"],
         ["food", "美食訂位", "美食訂位色"],
+        ["shopping", "購物", "購物色"],
         ["important", "重要提醒", "重要提醒色"],
       ];
       const className = `color-row${extraClass ? ` ${extraClass}` : ""}`;
@@ -2087,6 +2139,7 @@
 
     function inferItemNoteColor(item) {
       if (item.querySelector(".chip.food")) return "food";
+      if (item.querySelector(".chip.shopping")) return "shopping";
       if (item.querySelector(".chip.drive")) return "transport";
       if (item.querySelector(".chip.hotel")) return "hotel";
       return "important";
@@ -2108,11 +2161,27 @@
       });
     }
 
+    function mapButtonMarkup() {
+      return '<button class="map-btn" type="button" data-action="open-map" title="在 Google Maps 搜尋" aria-label="在 Google Maps 搜尋"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11z"/><path d="M12 10h.01"/></svg></button>';
+    }
+
+    function normalizeMapButtons(scope = document) {
+      const items = [...scope.querySelectorAll(".item")];
+      if (scope.matches?.(".item")) items.unshift(scope);
+      items.forEach((item) => {
+        const body = item.querySelector(".item-body");
+        const title = body?.querySelector("h4");
+        if (!body || !title || body.querySelector('[data-action="open-map"]')) return;
+        title.insertAdjacentHTML("afterend", mapButtonMarkup());
+      });
+    }
+
     function prepareEditableFields(scope = document) {
       normalizeDateFields(scope);
       normalizeDayActions(scope);
       normalizeNoteControls(scope);
       normalizeItemNoteControls(scope);
+      normalizeMapButtons(scope);
       normalizeAttachmentActions(scope);
       assignDynamicKeys(scope);
       scope.querySelectorAll("[data-placeholder]").forEach(syncPlaceholder);
@@ -2173,7 +2242,7 @@
         }
       }
       const data = legacyData || collectData();
-      const name = tripNameInput?.value.trim() || data["trip-title"]?.replace(/<[^>]*>/g, "").trim() || defaultTripName();
+      const name = data["trip-title"]?.replace(/<[^>]*>/g, "").trim() || defaultTripName();
       const state = {
         currentTripId: "default",
         trips: {
@@ -2223,7 +2292,7 @@
           updatedAt: new Date().toISOString(),
           data: collectData(),
         };
-        trip.name = tripNameInput?.value.trim() || trip.name || defaultTripName();
+        trip.name = defaultTripName() || trip.name || "未命名行程表";
         trip.updatedAt = new Date().toISOString();
         trip.data = collectData();
         state.trips[currentTripId] = trip;
@@ -2242,7 +2311,7 @@
 
     function backupFileName() {
       const date = new Date().toISOString().slice(0, 10);
-      const rawName = tripNameInput?.value.trim() || defaultTripName();
+      const rawName = defaultTripName();
       const safeName = rawName.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").slice(0, 42) || "itinerary";
       return `${safeName}-backup-${date}.json`;
     }
@@ -2528,12 +2597,14 @@
 
     function createNewTrip() {
       saveCurrentTrip();
-      const name = window.prompt("新行程表名稱", `${tripNameInput?.value.trim() || defaultTripName()} 複本`);
+      const name = window.prompt("新行程表名稱", `${defaultTripName()} 複本`);
       if (!name) return;
       const state = ensureTripsState();
       const id = `trip-${Date.now()}`;
       currentTripId = id;
       if (tripNameInput) tripNameInput.value = name.trim();
+      const titleField = document.querySelector("[data-save='trip-title']");
+      if (titleField) titleField.textContent = name.trim();
       state.currentTripId = id;
       state.trips[id] = {
         id,
@@ -2605,7 +2676,7 @@
       note.dataset.noteColor = item.color || "important";
       const chip = node.querySelector(".chip");
       chip.textContent = item.chip || "備註";
-      chip.className = `chip${item.color === "food" ? " food" : item.color === "transport" ? " drive" : item.color === "hotel" ? " hotel" : ""}`;
+      chip.className = `chip${item.color === "food" ? " food" : item.color === "transport" ? " drive" : item.color === "hotel" ? " hotel" : item.color === "shopping" ? " shopping" : ""}`;
       prepareEditableFields(node);
     }
 
@@ -2712,12 +2783,13 @@
     function inferPlanColor(text) {
       if (/酒店|住宿|check.?in|旅館|hotel/i.test(text)) return "hotel";
       if (/餐|食|壽司|拉麵|咖喱|海鮮|居酒屋|午餐|晚餐|早餐|訂位/i.test(text)) return "food";
+      if (/購物|商場|百貨|outlet|mall|手信|藥妝|免稅|退稅/i.test(text)) return "shopping";
       if (/車|自駕|機場|航班|JR|交通|取車|還車|出發|抵達|路線/i.test(text)) return "transport";
       return "important";
     }
 
     function colorLabel(color) {
-      return color === "hotel" ? "住宿" : color === "food" ? "美食 / 訂位" : color === "transport" ? "航班 / 交通" : "重要提醒";
+      return color === "hotel" ? "住宿" : color === "food" ? "美食 / 訂位" : color === "shopping" ? "購物" : color === "transport" ? "航班 / 交通" : "重要提醒";
     }
 
     function extractTime(text) {
@@ -2880,6 +2952,17 @@
       lightboxImage.removeAttribute("src");
     }
 
+    function openMapForItem(item) {
+      const title = item.querySelector(".item-body h4")?.textContent.trim() || "";
+      const note = item.querySelector(".item-body > p")?.textContent.trim() || "";
+      const query = [title, note].filter(Boolean).join(" ");
+      if (!query) {
+        showToast("請先填寫地點名稱");
+        return;
+      }
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, "_blank", "noopener");
+    }
+
     function resetData() {
       const confirmed = window.confirm("重置只會清除此裝置瀏覽器內的所有行程表、清單和截圖。是否繼續？");
       if (!confirmed) return;
@@ -2944,6 +3027,7 @@
       if (!actionButton) return;
       const action = actionButton.dataset.action;
       if (action === "open-image") openImage(actionButton);
+      if (action === "open-map") openMapForItem(actionButton.closest(".item"));
       if (action === "close-image") closeImage();
       if (action === "print") printPdf();
       if (action === "reset") resetData();

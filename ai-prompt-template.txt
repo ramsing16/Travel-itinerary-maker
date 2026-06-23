@@ -4,10 +4,11 @@
 1. 只輸出 JSON，不要輸出 Markdown、解釋文字或 ```json 程式碼框。
 2. 必須完全跟隨我提供的 JSON template 結構。
 3. 日期欄位 `iso` 必須使用 `YYYY-MM-DD` 格式。
-4. `noteColor` 和每個 item 的 `color` 只能使用以下四個值之一：
+4. `noteColor` 和每個 item 的 `color` 只能使用以下五個值之一：
    - `hotel`：住宿
    - `transport`：航班 / 交通 / 車程
    - `food`：美食 / 訂位
+   - `shopping`：購物 / 手信 / 商場 / 藥妝 / 免稅
    - `important`：重要提醒 / 景點 / 活動
 5. 每日 `items` 建議 3 至 5 個，不要過度密集。
 6. 請加入合理的交通、車程、用餐、休息、購物和備案時間。

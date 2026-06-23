@@ -113,8 +113,8 @@
           "time": "15:00",
           "title": "下午活動",
           "note": "填寫景點、購物、門票或活動安排。",
-          "color": "important",
-          "chip": "活動"
+          "color": "shopping",
+          "chip": "購物"
         }
       ]
     }
