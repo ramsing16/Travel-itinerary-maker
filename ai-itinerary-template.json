@@ -80,8 +80,7 @@
           "places": [
             {
               "placeName": "目的地機場 / 車站名稱",
-              "address": "如有固定地點，填寫完整地址；沒有就留空",
-              "mapCode": "如有日本車機 MapCode，填寫數字碼；沒有就留空"
+              "googleMapUrl": "貼上該地點的 Google Maps 連結；沒有就留空"
             }
           ],
           "color": "transport",
@@ -94,8 +93,7 @@
           "places": [
             {
               "placeName": "餐廳 / 商場 / 景點名稱",
-              "address": "完整地址",
-              "mapCode": ""
+              "googleMapUrl": "Google Maps 連結"
             }
           ],
           "color": "food",
@@ -116,8 +114,7 @@
           "places": [
             {
               "placeName": "景點名稱",
-              "address": "完整地址",
-              "mapCode": ""
+              "googleMapUrl": "Google Maps 連結"
             }
           ],
           "color": "transport",
@@ -130,8 +127,7 @@
           "places": [
             {
               "placeName": "餐廳名稱",
-              "address": "完整地址",
-              "mapCode": ""
+              "googleMapUrl": "Google Maps 連結"
             }
           ],
           "color": "food",
@@ -144,8 +140,7 @@
           "places": [
             {
               "placeName": "商場 / 景點名稱",
-              "address": "完整地址",
-              "mapCode": ""
+              "googleMapUrl": "Google Maps 連結"
             }
           ],
           "color": "shopping",

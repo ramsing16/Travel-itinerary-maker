@@ -942,8 +942,7 @@
     }
 
     .place-name,
-    .map-code,
-    .place-address {
+    .map-url {
       min-height: 21px;
       color: var(--ink);
       font-size: 13px;
@@ -955,8 +954,7 @@
       font-weight: 850;
     }
 
-    .map-code,
-    .place-address {
+    .map-url {
       color: var(--muted);
     }
 
@@ -1901,14 +1899,13 @@
       <div class="item-time" contenteditable="true" data-save="" data-placeholder="時間">時間</div>
       <div class="item-body">
         <h4 contenteditable="true" data-save="" data-placeholder="新增景點 / 餐廳 / 車程">新增景點 / 餐廳 / 車程</h4>
-        <p contenteditable="true" data-save="" data-placeholder="填寫地址、停留時間、訂位資料或備註。">填寫地址、停留時間、訂位資料或備註。</p>
+        <p contenteditable="true" data-save="" data-placeholder="填寫停留時間、訂位資料或備註。">填寫停留時間、訂位資料或備註。</p>
         <div class="place-fields" data-place-fields>
-          <span class="place-label">地址</span>
+          <span class="place-label">地點</span>
           <div class="place-entries">
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-              <span class="map-code" contenteditable="true" data-save="" data-placeholder="MapCode（如有）"></span>
-              <span class="place-address" contenteditable="true" data-save="" data-placeholder="完整地址"></span>
+              <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
             </div>
           </div>
         </div>
@@ -2264,12 +2261,11 @@
     function placeFieldsMarkup() {
       return `
         <div class="place-fields" data-place-fields>
-          <span class="place-label">地址</span>
+          <span class="place-label">地點</span>
           <div class="place-entries">
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-              <span class="map-code" contenteditable="true" data-save="" data-placeholder="MapCode（如有）"></span>
-              <span class="place-address" contenteditable="true" data-save="" data-placeholder="完整地址"></span>
+              <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
             </div>
           </div>
         </div>
@@ -2293,6 +2289,24 @@
           placeFields.querySelectorAll(".place-entry").forEach((entry) => entries.appendChild(entry));
           placeFields.appendChild(entries);
         }
+        body.querySelectorAll("[data-place-fields] .place-label").forEach((label) => {
+          label.textContent = "地點";
+        });
+        body.querySelectorAll(".place-entry").forEach((entry) => {
+          const oldAddress = editableText(entry.querySelector(".place-address"));
+          const oldMapCode = editableText(entry.querySelector(".map-code"));
+          let mapUrl = entry.querySelector(".map-url");
+          if (!mapUrl) {
+            mapUrl = document.createElement("span");
+            mapUrl.className = "map-url";
+            mapUrl.contentEditable = "true";
+            mapUrl.dataset.save = "";
+            mapUrl.dataset.placeholder = "Google Maps 連結";
+            mapUrl.textContent = oldAddress ? googleMapsUrl(oldAddress) : oldMapCode;
+            entry.appendChild(mapUrl);
+          }
+          entry.querySelectorAll(".map-code, .place-address").forEach((node) => node.remove());
+        });
       });
     }
 
@@ -2305,46 +2319,35 @@
       return `
         <div class="place-entry">
           <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-          <span class="map-code" contenteditable="true" data-save="" data-placeholder="MapCode（如有）"></span>
-          <span class="place-address" contenteditable="true" data-save="" data-placeholder="完整地址"></span>
+          <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
         </div>
       `;
     }
 
     function setPlaceEntry(entry, place = {}) {
       entry.querySelector(".place-name").textContent = place.placeName || place.name || place.place || place.location || "";
-      entry.querySelector(".map-code").textContent = place.mapCode || place.mapcode || "";
-      entry.querySelector(".place-address").textContent = place.address || "";
+      const mapUrl = place.googleMapUrl || place.mapUrl || place.mapsUrl || place.url || "";
+      const address = place.address || "";
+      entry.querySelector(".map-url").textContent = mapUrl || (address ? googleMapsUrl(address) : "");
+    }
+
+    function normalizeGoogleMapUrl(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      if (/^https?:\/\//i.test(text)) return text;
+      return googleMapsUrl(text);
     }
 
     function itemPlaceDetails(item) {
       return [...item.querySelectorAll(".place-entry")].map((entry) => {
         const placeName = editableText(entry.querySelector(".place-name"));
-        const mapCode = editableText(entry.querySelector(".map-code"));
-        const address = editableText(entry.querySelector(".place-address"));
-        if (!placeName && !address && !mapCode) return null;
-        const labelBase = placeName || address || "Google Map";
+        const mapUrl = normalizeGoogleMapUrl(editableText(entry.querySelector(".map-url")));
+        if (!placeName || !mapUrl) return null;
         return {
-          label: `${labelBase}${mapCode ? `｜MapCode: ${mapCode}` : ""}`,
-          query: address || placeName || mapCode,
+          label: placeName,
+          href: mapUrl,
         };
-      }).filter(Boolean).filter((entry) => entry.query);
-    }
-
-    function extractLocationNames(item) {
-      const title = item.querySelector(".item-body h4")?.textContent.trim() || "";
-      const note = item.querySelector(".item-body > p")?.textContent.trim() || "";
-      const rawParts = title
-        .split(/[／/｜|、，,・＋+]| 或 | 及 | 和 | then | and /i)
-        .map((part) => part.trim())
-        .filter(Boolean);
-      const suffixPattern = /([A-Za-z0-9][A-Za-z0-9 '&.-]{2,40}(?:Hotel|Station|Airport|Market|Park|Mall|Outlet|Restaurant|Sushi|Cafe|Tower|Museum|Garden|Terrace|Field)|[\u3400-\u9fffぁ-んァ-ヶーA-Za-z0-9・（）()&' -]{2,32}(?:酒店|旅館|機場|車站|站|市場|公園|商場|百貨|Outlet|餐廳|壽司|拉麵|咖啡|景點|神社|寺|塔|博物館|花園|露台|球場|岬|海岸|瀑布|農場))/g;
-      const noteMatches = [...note.matchAll(suffixPattern)].map((match) => match[1].trim());
-      return [...rawParts, ...noteMatches]
-        .map((name) => name.replace(/^(前往|遊覽|入住|午餐|晚餐|早餐|購物|抵達|出發|到達|回到|返回)[：:\s]*/, "").trim())
-        .filter((name) => name.length >= 2 && !/^(時間|備註|新增|新增景點|景點|餐廳|車程|填寫|填寫地址|住宿|航班|交通|美食|購物|重要提醒)$/.test(name))
-        .filter((name, index, arr) => arr.indexOf(name) === index)
-        .slice(0, 4);
+      }).filter(Boolean).filter((entry) => entry.href);
     }
 
     function normalizeMapLinks(scope = document) {
@@ -2355,14 +2358,11 @@
         if (!body) return;
         body.querySelector('[data-action="open-map"]')?.remove();
         body.querySelector(".map-link-row")?.remove();
-        const placeDetails = itemPlaceDetails(item);
-        const linksData = placeDetails.length
-          ? placeDetails
-          : extractLocationNames(item).map((name) => ({ label: name, query: name }));
+        const linksData = itemPlaceDetails(item);
         if (!linksData.length) return;
         const title = body.querySelector("h4");
         const links = linksData.map((entry) => (
-          `<a class="map-link" href="${googleMapsUrl(entry.query)}" target="_blank" rel="noopener">${escapeAttr(entry.label)}</a>`
+          `<a class="map-link" href="${escapeAttr(entry.href)}" target="_blank" rel="noopener">${escapeAttr(entry.label)}</a>`
         )).join("");
         title?.insertAdjacentHTML("afterend", `<div class="map-link-row">${links}</div>`);
       });
@@ -2865,11 +2865,11 @@
       node.querySelector(".item-time").dataset.placeholderActive = item.time ? "false" : "true";
       node.querySelector(".item-body h4").textContent = item.title || "新增景點 / 餐廳 / 車程";
       const note = node.querySelector(".item-body > p");
-      note.textContent = item.note || "填寫地址、停留時間、訂位資料或備註。";
+      note.textContent = item.note || "填寫停留時間、訂位資料或備註。";
       note.dataset.noteColor = item.color || "important";
       const places = Array.isArray(item.places) && item.places.length
         ? item.places
-        : [{ placeName: item.placeName || item.place || item.location || "", address: item.address || "", mapCode: item.mapCode || item.mapcode || "" }];
+        : [{ placeName: item.placeName || item.place || item.location || "", googleMapUrl: item.googleMapUrl || item.mapUrl || item.mapsUrl || item.url || "", address: item.address || "" }];
       const entries = node.querySelector(".place-entries");
       entries.innerHTML = "";
       places.forEach((place) => {
@@ -3068,8 +3068,8 @@
         note: typeof item === "object" ? (item.note || item.description || text) : text,
         places: typeof item === "object" && Array.isArray(item.places) ? item.places : [],
         placeName: typeof item === "object" ? (item.placeName || item.place || item.location || "") : "",
+        googleMapUrl: typeof item === "object" ? (item.googleMapUrl || item.mapUrl || item.mapsUrl || item.url || "") : "",
         address: typeof item === "object" ? (item.address || "") : "",
-        mapCode: typeof item === "object" ? (item.mapCode || item.mapcode || "") : "",
         color,
         chip: typeof item === "object" ? (item.chip || colorLabel(color)) : colorLabel(color),
       };
