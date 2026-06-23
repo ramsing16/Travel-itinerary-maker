@@ -1772,37 +1772,8 @@
           <h2 id="route-heading">車程路線</h2>
           <p contenteditable="true" data-save="route-note" data-placeholder="填寫車程、交通或路線備註。">填寫車程、交通或路線備註。</p>
         </div>
-        <div class="route-strip">
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-1-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-1-title" data-placeholder="路線 1">路線 1</h3>
-            <p contenteditable="true" data-save="route-1-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-2-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-2-title" data-placeholder="路線 2">路線 2</h3>
-            <p contenteditable="true" data-save="route-2-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-3-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-3-title" data-placeholder="路線 3">路線 3</h3>
-            <p contenteditable="true" data-save="route-3-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-4-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-4-title" data-placeholder="路線 4">路線 4</h3>
-            <p contenteditable="true" data-save="route-4-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-5-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-5-title" data-placeholder="路線 5">路線 5</h3>
-            <p contenteditable="true" data-save="route-5-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
-          <article class="route-card">
-            <time contenteditable="true" data-save="route-6-date" data-placeholder="日期">日期</time>
-            <h3 contenteditable="true" data-save="route-6-title" data-placeholder="路線 6">路線 6</h3>
-            <p contenteditable="true" data-save="route-6-body" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
-          </article>
+        <div class="route-strip" id="route-strip">
+          <p class="empty-note">未加入車程路線。</p>
         </div>
       </section>
 
@@ -1971,6 +1942,14 @@
     </li>
   </template>
 
+  <template id="route-template">
+    <article class="route-card">
+      <time contenteditable="true" data-save="" data-placeholder="日期">日期</time>
+      <h3 contenteditable="true" data-save="" data-placeholder="路線">路線</h3>
+      <p contenteditable="true" data-save="" data-placeholder="填寫車程、交通方式和備註。">填寫車程、交通方式和備註。</p>
+    </article>
+  </template>
+
   <template id="attachment-template">
     <figure class="attachment-card">
       <img class="zoomable-image" data-action="open-image" alt="行程附件截圖">
@@ -1985,6 +1964,7 @@
   <script>
     const app = document.querySelector("#app");
     const days = document.querySelector("#days");
+    const routeStrip = document.querySelector("#route-strip");
     const memoList = document.querySelector("#memo-list");
     const attachmentGrid = document.querySelector("#attachment-grid");
     const screenshotInput = document.querySelector("#screenshot-input");
@@ -2457,6 +2437,7 @@
         data[node.dataset.save] = node.innerHTML;
       });
       data.daysMarkup = days.innerHTML;
+      data.routeMarkup = routeStrip.innerHTML;
       data.memoMarkup = memoList.innerHTML;
       data.attachmentsMarkup = attachmentGrid.innerHTML;
       return data;
@@ -2464,6 +2445,12 @@
 
     function applyData(data) {
       if (data.daysMarkup) days.innerHTML = data.daysMarkup;
+      if (data.routeMarkup) {
+        routeStrip.innerHTML = data.routeMarkup;
+      } else {
+        const legacyRouteMarkup = legacyRouteMarkupFromData(data);
+        if (legacyRouteMarkup) routeStrip.innerHTML = legacyRouteMarkup;
+      }
       if (data.memoMarkup) memoList.innerHTML = data.memoMarkup;
       if (data.attachmentsMarkup) attachmentGrid.innerHTML = data.attachmentsMarkup;
       document.querySelectorAll("[data-save]").forEach((node) => {
@@ -2667,6 +2654,12 @@
       return node.innerHTML;
     }
 
+    function htmlToText(value, fallback = "", limit = 900) {
+      const node = document.createElement("span");
+      node.innerHTML = String(value || "");
+      return plainText(node.textContent, fallback, limit);
+    }
+
     function blankImportData() {
       return {
         "trip-title": escapedText("我的行程表"),
@@ -2698,28 +2691,59 @@
         "hotel-3": escapedText("交通 / 租車備註"),
         "hotel-4": escapedText("費用 / 現金備註"),
         "route-note": escapedText("填寫車程、交通或路線備註。"),
-        "route-1-date": escapedText("日期"),
-        "route-1-title": escapedText("路線 1"),
-        "route-1-body": escapedText("填寫車程、交通方式和備註。"),
-        "route-2-date": escapedText("日期"),
-        "route-2-title": escapedText("路線 2"),
-        "route-2-body": escapedText("填寫車程、交通方式和備註。"),
-        "route-3-date": escapedText("日期"),
-        "route-3-title": escapedText("路線 3"),
-        "route-3-body": escapedText("填寫車程、交通方式和備註。"),
-        "route-4-date": escapedText("日期"),
-        "route-4-title": escapedText("路線 4"),
-        "route-4-body": escapedText("填寫車程、交通方式和備註。"),
-        "route-5-date": escapedText("日期"),
-        "route-5-title": escapedText("路線 5"),
-        "route-5-body": escapedText("填寫車程、交通方式和備註。"),
-        "route-6-date": escapedText("日期"),
-        "route-6-title": escapedText("路線 6"),
-        "route-6-body": escapedText("填寫車程、交通方式和備註。"),
+        routeMarkup: routeMarkupFromItems([]),
         "days-note": escapedText("填寫每日行程備註。"),
         "memo-note": escapedText("把確認事項、訂房、門票、租車與截圖集中在這裡。"),
         "screenshots-note": escapedText("加入機票、酒店、租車、球票、餐廳等確認截圖。"),
       };
+    }
+
+    function routeMarkupFromItems(routes = []) {
+      const validRoutes = routes.filter((route) => {
+        if (typeof route === "string") return plainText(route, "", 220);
+        if (!route || typeof route !== "object") return false;
+        return plainText(route.date || route.day || route.title || route.note || route.body || route.description || "", "", 260);
+      });
+      if (!validRoutes.length) return '<p class="empty-note">未加入車程路線。</p>';
+
+      const wrapper = document.createElement("div");
+      validRoutes.forEach((route, index) => {
+        const number = index + 1;
+        const node = document.querySelector("#route-template").content.firstElementChild.cloneNode(true);
+        const routeDate = typeof route === "string" ? "" : route.date || route.day || route.label || "";
+        const routeTitle = typeof route === "string" ? `路線 ${number}` : route.title || route.route || `路線 ${number}`;
+        const routeBody = typeof route === "string"
+          ? route
+          : route.note || route.body || route.description || [route.drive, route.publicTransport, route.parking, route.memo].filter(Boolean).join(" / ");
+
+        const dateField = node.querySelector("time");
+        const titleField = node.querySelector("h3");
+        const bodyField = node.querySelector("p");
+        dateField.dataset.save = `route-${number}-date`;
+        titleField.dataset.save = `route-${number}-title`;
+        bodyField.dataset.save = `route-${number}-body`;
+        dateField.textContent = plainText(routeDate, "日期", 40);
+        titleField.textContent = plainText(routeTitle, `路線 ${number}`, 90);
+        bodyField.textContent = plainText(routeBody, "填寫車程、交通方式和備註。", 260);
+        wrapper.appendChild(node);
+      });
+      return wrapper.innerHTML;
+    }
+
+    function legacyRouteMarkupFromData(data) {
+      const routes = [];
+      for (let index = 1; index <= 20; index += 1) {
+        const dateKey = `route-${index}-date`;
+        const titleKey = `route-${index}-title`;
+        const bodyKey = `route-${index}-body`;
+        if (![dateKey, titleKey, bodyKey].some((key) => Object.prototype.hasOwnProperty.call(data, key))) continue;
+        routes.push({
+          date: htmlToText(data[dateKey], "日期", 40),
+          title: htmlToText(data[titleKey], `路線 ${index}`, 90),
+          note: htmlToText(data[bodyKey], "填寫車程、交通方式和備註。", 260),
+        });
+      }
+      return routes.length ? routeMarkupFromItems(routes) : "";
     }
 
     function memoMarkupFromItems(items = []) {
@@ -2777,12 +2801,7 @@
       accommodations.slice(0, 4).forEach((item, index) => {
         data[`hotel-${index + 1}`] = escapedText(item, index < 2 ? `住宿 ${index + 1}` : "備註", 160);
       });
-      routes.slice(0, 6).forEach((route, index) => {
-        const number = index + 1;
-        data[`route-${number}-date`] = escapedText(route.date, "日期", 40);
-        data[`route-${number}-title`] = escapedText(route.title, `路線 ${number}`, 90);
-        data[`route-${number}-body`] = escapedText(route.note || route.body, "填寫車程、交通方式和備註。", 180);
-      });
+      data.routeMarkup = routeMarkupFromItems(routes);
       data["route-note"] = escapedText(payload.routeNote || overview.routeNote, "填寫車程、交通或路線備註。", 160);
       data["days-note"] = escapedText(payload.daysNote, "填寫每日行程備註。", 160);
       data["memo-note"] = escapedText(payload.memoNote, "把確認事項、訂房、門票、租車與截圖集中在這裡。", 160);
