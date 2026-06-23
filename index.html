@@ -942,6 +942,7 @@
     }
 
     .place-name,
+    .place-address,
     .map-url {
       min-height: 21px;
       color: var(--ink);
@@ -954,8 +955,12 @@
       font-weight: 850;
     }
 
-    .map-url {
+    .place-address {
       color: var(--muted);
+    }
+
+    .map-url {
+      display: none;
     }
 
     .map-link-row {
@@ -1905,7 +1910,8 @@
           <div class="place-entries">
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-              <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
+              <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
+              <span class="map-url" data-save=""></span>
             </div>
           </div>
         </div>
@@ -2250,8 +2256,9 @@
       });
     }
 
-    function googleMapsUrl(query) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    function googleMapsPlaceUrl(placeName, address = "") {
+      const query = [placeName, address].map((part) => String(part || "").trim()).filter(Boolean).join(" ");
+      return query ? `https://www.google.com/maps/place/${encodeURIComponent(query)}` : "";
     }
 
     function escapeAttr(value) {
@@ -2265,7 +2272,8 @@
           <div class="place-entries">
             <div class="place-entry">
               <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-              <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
+              <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
+              <span class="map-url" data-save=""></span>
             </div>
           </div>
         </div>
@@ -2293,19 +2301,37 @@
           label.textContent = "地點";
         });
         body.querySelectorAll(".place-entry").forEach((entry) => {
-          const oldAddress = editableText(entry.querySelector(".place-address"));
+          let address = editableText(entry.querySelector(".place-address"));
           const oldMapCode = editableText(entry.querySelector(".map-code"));
           let mapUrl = entry.querySelector(".map-url");
+          if (!entry.querySelector(".place-address")) {
+            const addressNode = document.createElement("span");
+            addressNode.className = "place-address";
+            addressNode.contentEditable = "true";
+            addressNode.dataset.save = "";
+            addressNode.dataset.placeholder = "Full address";
+            entry.appendChild(addressNode);
+          }
           if (!mapUrl) {
             mapUrl = document.createElement("span");
             mapUrl.className = "map-url";
-            mapUrl.contentEditable = "true";
             mapUrl.dataset.save = "";
-            mapUrl.dataset.placeholder = "Google Maps 連結";
-            mapUrl.textContent = oldAddress ? googleMapsUrl(oldAddress) : oldMapCode;
             entry.appendChild(mapUrl);
           }
-          entry.querySelectorAll(".map-code, .place-address").forEach((node) => node.remove());
+          const placeName = editableText(entry.querySelector(".place-name"));
+          if (!address && mapUrl.textContent.includes("/maps/search/")) {
+            try {
+              const url = new URL(mapUrl.textContent);
+              address = url.searchParams.get("query") || "";
+              entry.querySelector(".place-address").textContent = address;
+            } catch (error) {
+              address = "";
+            }
+          }
+          if (!mapUrl.textContent || mapUrl.textContent.includes("/maps/search/") || oldMapCode) {
+            mapUrl.textContent = googleMapsPlaceUrl(placeName, address);
+          }
+          entry.querySelectorAll(".map-code").forEach((node) => node.remove());
         });
       });
     }
@@ -2319,29 +2345,41 @@
       return `
         <div class="place-entry">
           <span class="place-name" contenteditable="true" data-save="" data-placeholder="店舖 / 地點名稱"></span>
-          <span class="map-url" contenteditable="true" data-save="" data-placeholder="Google Maps 連結"></span>
+          <span class="place-address" contenteditable="true" data-save="" data-placeholder="Full address"></span>
+          <span class="map-url" data-save=""></span>
         </div>
       `;
     }
 
     function setPlaceEntry(entry, place = {}) {
       entry.querySelector(".place-name").textContent = place.placeName || place.name || place.place || place.location || "";
+      entry.querySelector(".place-address").textContent = place.address || "";
       const mapUrl = place.googleMapUrl || place.mapUrl || place.mapsUrl || place.url || "";
       const address = place.address || "";
-      entry.querySelector(".map-url").textContent = mapUrl || (address ? googleMapsUrl(address) : "");
+      entry.querySelector(".map-url").textContent = mapUrl || googleMapsPlaceUrl(place.placeName || place.name || place.place || place.location || "", address);
+    }
+
+    function syncPlaceLink(entry) {
+      if (!entry) return;
+      const placeName = editableText(entry.querySelector(".place-name"));
+      const address = editableText(entry.querySelector(".place-address"));
+      const mapUrl = entry.querySelector(".map-url");
+      if (mapUrl) mapUrl.textContent = googleMapsPlaceUrl(placeName, address);
     }
 
     function normalizeGoogleMapUrl(value) {
       const text = String(value || "").trim();
       if (!text) return "";
       if (/^https?:\/\//i.test(text)) return text;
-      return googleMapsUrl(text);
+      return googleMapsPlaceUrl(text);
     }
 
     function itemPlaceDetails(item) {
       return [...item.querySelectorAll(".place-entry")].map((entry) => {
         const placeName = editableText(entry.querySelector(".place-name"));
-        const mapUrl = normalizeGoogleMapUrl(editableText(entry.querySelector(".map-url")));
+        const address = editableText(entry.querySelector(".place-address"));
+        const savedMapUrl = editableText(entry.querySelector(".map-url"));
+        const mapUrl = normalizeGoogleMapUrl(savedMapUrl || googleMapsPlaceUrl(placeName, address));
         if (!placeName || !mapUrl) return null;
         return {
           label: placeName,
@@ -3211,7 +3249,10 @@
       field.classList.remove("editable-placeholder");
       field.dataset.placeholderActive = "false";
       const item = field.closest(".item");
-      if (item && field.closest("[data-place-fields]")) normalizeMapLinks(item);
+      if (item && field.closest("[data-place-fields]")) {
+        syncPlaceLink(field.closest(".place-entry"));
+        normalizeMapLinks(item);
+      }
       scheduleSave();
     });
 
