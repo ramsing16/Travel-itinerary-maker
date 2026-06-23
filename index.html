@@ -1492,15 +1492,76 @@
         position: sticky;
         top: var(--sticky-day-offset, 86px);
         z-index: 12;
-        grid-template-columns: 68px 1fr;
+        grid-template-columns: 58px minmax(0, 1fr) 66px;
+        gap: 8px;
+        align-items: start;
+        padding: 8px;
         border-radius: 8px 8px 0 0;
         background: linear-gradient(90deg, #ffffff, #eef7f8);
         box-shadow: 0 8px 16px rgba(24, 32, 38, .08);
       }
 
+      .day-date {
+        min-height: 58px;
+        font-size: 17px;
+      }
+
+      .day-date small {
+        font-size: 11px;
+      }
+
+      .day-date .date-hint {
+        display: none;
+      }
+
+      .day-title h3 {
+        display: -webkit-box;
+        overflow: hidden;
+        font-size: 17px;
+        line-height: 1.18;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .day-title h3:focus {
+        display: block;
+        overflow: visible;
+        -webkit-line-clamp: unset;
+      }
+
+      .day-title p {
+        margin-top: 4px;
+        font-size: 13px;
+        line-height: 1.28;
+      }
+
+      .day-title .color-row {
+        gap: 5px;
+        margin-top: 7px;
+      }
+
+      .day-title .color-dot {
+        width: 24px;
+        height: 24px;
+      }
+
       .day-actions {
-        grid-column: 1 / -1;
+        grid-column: 3;
+        grid-row: 1;
+        align-self: start;
         justify-content: end;
+        gap: 5px;
+      }
+
+      .day-actions .icon-btn {
+        width: 30px;
+        min-height: 30px;
+        border-radius: 7px;
+      }
+
+      .day-actions .icon {
+        width: 15px;
+        height: 15px;
       }
 
       .day-card + .day-card {
