@@ -127,6 +127,10 @@
       gap: 8px;
     }
 
+    .toolbar-toggle {
+      display: none;
+    }
+
     .trip-manager {
       display: flex;
       align-items: center;
@@ -1389,12 +1393,15 @@
 
     @media (max-width: 640px) {
       .topbar {
-        align-items: flex-start;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
       }
 
       .brand {
-        width: 100%;
+        width: auto;
       }
 
       .brand span:not(.privacy-pill),
@@ -1402,13 +1409,38 @@
         display: none;
       }
 
+      .toolbar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 34px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: var(--forest);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 850;
+        box-shadow: 0 1px 0 rgba(24, 32, 38, .08);
+      }
+
+      .toolbar-toggle .icon {
+        width: 15px;
+        height: 15px;
+      }
+
       .top-actions {
-        display: grid;
+        grid-column: 1 / -1;
+        display: none;
         grid-template-columns: minmax(62px, 1fr) 40px 30px 30px 39px 39px 39px 30px 36px;
         gap: 3px;
         width: 100%;
         overflow-x: visible;
         padding-bottom: 0;
+      }
+
+      .topbar.toolbar-open .top-actions {
+        display: grid;
       }
 
       .trip-manager {
@@ -1826,7 +1858,11 @@
         <span contenteditable="true" data-save="trip-subtitle" data-placeholder="日期 / 地點 / 主題">日期 / 地點 / 主題</span>
         <span class="privacy-pill">私人本機儲存</span>
       </div>
-      <div class="top-actions">
+      <button class="toolbar-toggle" type="button" data-action="toggle-toolbar" aria-expanded="false" aria-controls="top-actions">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+        <span class="toolbar-toggle-text">工具</span>
+      </button>
+      <div class="top-actions" id="top-actions">
         <div class="trip-manager">
           <select class="trip-select" id="trip-select" aria-label="選擇行程表"></select>
           <input class="trip-name-input" id="trip-name-input" type="hidden" value="我的行程表" aria-label="行程表名稱">
@@ -2136,6 +2172,8 @@
 
   <script>
     const app = document.querySelector("#app");
+    const topbar = document.querySelector(".topbar");
+    const toolbarToggle = document.querySelector(".toolbar-toggle");
     const days = document.querySelector("#days");
     const routeStrip = document.querySelector("#route-strip");
     const memoList = document.querySelector("#memo-list");
@@ -2156,10 +2194,23 @@
     let saveTimer;
 
     function updateStickyDayOffset() {
-      const topbar = document.querySelector(".topbar");
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
       const height = isMobile && topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 0;
       document.documentElement.style.setProperty("--sticky-day-offset", `${height}px`);
+    }
+
+    function setToolbarOpen(open) {
+      if (!topbar || !toolbarToggle) return;
+      topbar.classList.toggle("toolbar-open", open);
+      toolbarToggle.setAttribute("aria-expanded", String(open));
+      const label = toolbarToggle.querySelector(".toolbar-toggle-text");
+      if (label) label.textContent = open ? "收起" : "工具";
+      window.setTimeout(updateStickyDayOffset, 0);
+    }
+
+    function syncToolbarForViewport() {
+      if (!window.matchMedia("(max-width: 640px)").matches) setToolbarOpen(false);
+      updateStickyDayOffset();
     }
 
     function getTripYear() {
@@ -2805,6 +2856,7 @@
       readonlyApp.classList.add("share-readonly");
 
       readonlyApp.querySelector(".top-actions")?.remove();
+      readonlyApp.querySelector(".toolbar-toggle")?.remove();
       readonlyApp.querySelector(".privacy-pill")?.remove();
       readonlyApp.querySelector("#backup-input")?.remove();
       readonlyApp.querySelector("#screenshot-input")?.remove();
@@ -3705,6 +3757,10 @@
       }
       if (action === "open-image") openImage(actionButton);
       if (action === "close-image") closeImage();
+      if (action === "toggle-toolbar") {
+        setToolbarOpen(!topbar?.classList.contains("toolbar-open"));
+        return;
+      }
       if (action === "print") printPdf();
       if (action === "reset") resetData();
       if (action === "save-trip") saveCurrentTrip({ silent: false });
@@ -3791,13 +3847,13 @@
       event.target.value = "";
     });
 
-    window.addEventListener("resize", updateStickyDayOffset);
-    window.addEventListener("orientationchange", () => window.setTimeout(updateStickyDayOffset, 250));
+    window.addEventListener("resize", syncToolbarForViewport);
+    window.addEventListener("orientationchange", () => window.setTimeout(syncToolbarForViewport, 250));
     window.addEventListener("beforeprint", saveData);
     restoreData();
     prepareEditableFields();
     ensureAttachmentNote();
-    updateStickyDayOffset();
+    syncToolbarForViewport();
   </script>
 </body>
 </html>
