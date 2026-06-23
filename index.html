@@ -1396,12 +1396,17 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        gap: 8px;
-        padding: 8px 10px;
+        gap: 6px;
+        padding: 7px 8px;
+        background: rgba(247, 250, 250, .97);
       }
 
       .brand {
         width: auto;
+      }
+
+      .brand strong {
+        font-size: 16px;
       }
 
       .brand span:not(.privacy-pill),
@@ -1414,29 +1419,29 @@
         align-items: center;
         justify-content: center;
         gap: 4px;
-        min-height: 34px;
-        padding: 0 10px;
+        min-height: 32px;
+        padding: 0 9px;
         border-radius: 8px;
         background: var(--forest);
         color: #fff;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 850;
         box-shadow: 0 1px 0 rgba(24, 32, 38, .08);
       }
 
       .toolbar-toggle .icon {
-        width: 15px;
-        height: 15px;
+        width: 14px;
+        height: 14px;
       }
 
       .top-actions {
         grid-column: 1 / -1;
         display: none;
-        grid-template-columns: minmax(84px, 1.45fr) repeat(4, minmax(0, 1fr));
-        gap: 3px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
         width: 100%;
         overflow-x: visible;
-        padding-bottom: 0;
+        padding: 1px 0 0;
       }
 
       .topbar.toolbar-open .top-actions {
@@ -1451,8 +1456,9 @@
       .trip-select {
         width: 100%;
         min-width: 0;
-        min-height: 34px;
-        padding: 4px 5px;
+        grid-column: span 2;
+        min-height: 32px;
+        padding: 3px 5px;
         font-size: 11px;
       }
 
@@ -1460,38 +1466,43 @@
         grid-column: auto;
         justify-content: center;
         width: 100%;
-        min-height: 34px;
+        min-height: 32px;
         padding: 0 2px;
       }
 
       .trip-manager .icon-btn {
         width: 100%;
-        min-height: 34px;
+        min-height: 32px;
       }
 
       .top-actions > .command-btn {
         justify-content: center;
         width: 100%;
         min-width: 0;
-        min-height: 34px;
+        min-height: 32px;
         padding: 0 2px;
       }
 
       .top-actions > .icon-btn {
         width: 100%;
         min-width: 0;
-        min-height: 34px;
+        min-height: 32px;
       }
 
       .top-actions .command-btn {
-        gap: 2px;
-        font-size: 10px;
+        gap: 3px;
+        border-radius: 8px;
+        font-size: 11px;
         line-height: 1;
       }
 
+      .top-actions .icon-btn {
+        border-radius: 8px;
+      }
+
       .top-actions .icon {
-        width: 13px;
-        height: 13px;
+        width: 14px;
+        height: 14px;
       }
 
       .hero {
@@ -1877,22 +1888,22 @@
             <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
-        <button class="command-btn secondary" type="button" data-action="export-backup">
+        <button class="command-btn secondary" type="button" data-action="export-backup" title="匯出備份" aria-label="匯出備份">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
           匯出
         </button>
-        <button class="command-btn secondary" type="button" data-action="import-backup">
+        <button class="command-btn secondary" type="button" data-action="import-backup" title="匯入備份" aria-label="匯入備份">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
           匯入
         </button>
-        <button class="command-btn secondary" type="button" data-action="export-share">
+        <button class="command-btn secondary" type="button" data-action="export-share" title="分享 HTML" aria-label="分享 HTML">
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
           分享
         </button>
-        <button class="icon-btn" type="button" data-action="reset" title="重置" aria-label="重置">
+        <button class="icon-btn" type="button" data-action="reset" title="重置行程" aria-label="重置行程">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
         </button>
-        <button class="command-btn primary" type="button" data-action="print">
+        <button class="command-btn primary" type="button" data-action="print" title="製作 PDF" aria-label="製作 PDF">
           <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
           PDF
         </button>
