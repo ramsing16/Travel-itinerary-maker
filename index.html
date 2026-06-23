@@ -2905,13 +2905,11 @@
         .share-readonly { padding-bottom: 0; }
         .share-readonly .topbar {
           position: sticky;
-          top: 0;
+          top: var(--share-mobile-top-gap, 0px);
           z-index: 30;
           display: block;
           padding: 12px 14px;
-          background: rgba(244, 247, 248, .96);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
+          background: #ffffff;
           box-shadow: 0 1px 0 rgba(24, 32, 38, .08);
         }
         .share-readonly .brand strong,
@@ -2962,9 +2960,30 @@
           font-weight: 750;
         }
         @media (max-width: 640px) {
+          body {
+            padding-top: var(--share-mobile-top-gap, 0px);
+          }
           .share-banner {
+            display: none;
+          }
+          .share-readonly .topbar {
             margin: 8px 8px 0;
-            font-size: 13px;
+            padding: 8px 10px;
+            border: 1px solid #d7e5e1;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(24, 32, 38, .1);
+          }
+          .share-readonly .brand {
+            gap: 2px;
+          }
+          .share-readonly .brand strong {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 15px;
+          }
+          .share-readonly .brand span {
+            display: none;
           }
           .share-readonly .hero-copy {
             padding-top: 44px;
@@ -2979,7 +2998,10 @@
           function updateShareStickyOffset() {
             const topbar = document.querySelector(".share-readonly .topbar");
             const isMobile = window.matchMedia("(max-width: 640px)").matches;
-            const offset = isMobile && topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 0;
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            const topGap = isMobile && isIos ? 68 : 0;
+            document.documentElement.style.setProperty("--share-mobile-top-gap", topGap + "px");
+            const offset = isMobile && topbar ? topGap + Math.ceil(topbar.getBoundingClientRect().height) + 8 : 0;
             document.documentElement.style.setProperty("--share-sticky-day-offset", offset + "px");
           }
           function openImage(image) {
