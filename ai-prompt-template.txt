@@ -14,7 +14,8 @@
 6. 每個 item 如有明確景點、餐廳、酒店、商場或車站，請在 `places` 內填寫一個或多個地點：
    - `placeName`：店舖 / 景點 / 地點名稱
    - `address`：完整地址；不確定就留空，不要亂作
-   - `googleMapUrl`：該地點的 Google Maps 分享連結或 place 連結；不可使用 `/maps/search/`；不確定就留空
+   - `googleMapUrl`：Google Maps URL；不確定就留空，網站會用地點名稱和地址產生官方 Maps URL
+   - `googlePlaceId`：如有 Google Place ID 就填；沒有就留空
 7. 請加入合理的交通、車程、用餐、休息、購物和備案時間。
 8. 不要加入虛構的私人資料，例如訂單號、電話、護照號碼、QR code、門票 barcode。
 9. 如果資料不足，請用合理旅遊經驗補充，但不要假裝已確認訂位或門票。

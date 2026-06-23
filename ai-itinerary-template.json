@@ -81,7 +81,8 @@
             {
               "placeName": "目的地機場 / 車站名稱",
               "address": "完整地址",
-              "googleMapUrl": "該地點的 Google Maps 分享連結或 place 連結；不可使用 /maps/search/；沒有就留空"
+              "googleMapUrl": "Google Maps URL；沒有就留空，網站會用地點名稱和地址產生官方 Maps URL",
+              "googlePlaceId": "如有 Google Place ID 就填；沒有就留空"
             }
           ],
           "color": "transport",
@@ -95,7 +96,8 @@
             {
               "placeName": "餐廳 / 商場 / 景點名稱",
               "address": "完整地址",
-              "googleMapUrl": "Google Maps 分享連結或 place 連結"
+              "googleMapUrl": "Google Maps URL",
+              "googlePlaceId": ""
             }
           ],
           "color": "food",
@@ -117,7 +119,8 @@
             {
               "placeName": "景點名稱",
               "address": "完整地址",
-              "googleMapUrl": "Google Maps 分享連結或 place 連結"
+              "googleMapUrl": "Google Maps URL",
+              "googlePlaceId": ""
             }
           ],
           "color": "transport",
@@ -131,7 +134,8 @@
             {
               "placeName": "餐廳名稱",
               "address": "完整地址",
-              "googleMapUrl": "Google Maps 分享連結或 place 連結"
+              "googleMapUrl": "Google Maps URL",
+              "googlePlaceId": ""
             }
           ],
           "color": "food",
@@ -145,7 +149,8 @@
             {
               "placeName": "商場 / 景點名稱",
               "address": "完整地址",
-              "googleMapUrl": "Google Maps 分享連結或 place 連結"
+              "googleMapUrl": "Google Maps URL",
+              "googlePlaceId": ""
             }
           ],
           "color": "shopping",
