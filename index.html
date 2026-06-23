@@ -976,9 +976,12 @@
       align-items: center;
       min-height: 26px;
       padding: 4px 8px;
+      border: 0;
       border-radius: 999px;
       background: #edf7f4;
       color: var(--forest);
+      cursor: pointer;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 800;
       line-height: 1.2;
@@ -2400,10 +2403,20 @@
         if (!linksData.length) return;
         const title = body.querySelector("h4");
         const links = linksData.map((entry) => (
-          `<a class="map-link" href="${escapeAttr(entry.href)}" target="_blank" rel="noopener">${escapeAttr(entry.label)}</a>`
+          `<button class="map-link" type="button" data-action="open-map" data-map-url="${escapeAttr(entry.href)}">${escapeAttr(entry.label)}</button>`
         )).join("");
         title?.insertAdjacentHTML("afterend", `<div class="map-link-row">${links}</div>`);
       });
+    }
+
+    function openMapLink(button) {
+      const url = button?.dataset.mapUrl;
+      if (!url) {
+        showToast("未有 Google Maps 連結");
+        return;
+      }
+      const opened = window.open(url, "_blank", "noopener");
+      if (!opened) window.location.href = url;
     }
 
     function prepareEditableFields(scope = document) {
@@ -3268,6 +3281,10 @@
       const actionButton = event.target.closest("[data-action]");
       if (!actionButton) return;
       const action = actionButton.dataset.action;
+      if (action === "open-map") {
+        openMapLink(actionButton);
+        return;
+      }
       if (action === "open-image") openImage(actionButton);
       if (action === "close-image") closeImage();
       if (action === "print") printPdf();
